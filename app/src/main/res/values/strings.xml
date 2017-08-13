@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ETracking</string>
+
+    <string-array name="userType">
+        <item >Admin</item>
+        <item>User</item>
+
+    </string-array>
+</resources>
