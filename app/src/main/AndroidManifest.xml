@@ -2,23 +2,64 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.ballidaku.etracking">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
     <application
+        android:name=".commonClasses.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".frontScreens.SplashActivity">
+        <activity
+            android:name=".frontScreens.SplashActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".mainScreens.MainActivity">
+        <activity
+            android:name=".frontScreens.LoginActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
         </activity>
-        <activity android:name=".frontScreens.LoginActivity">
+        <activity
+            android:name=".frontScreens.SignUpActivity"
+            android:label=""
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden">
+        </activity>
+        <activity
+            android:name=".mainScreens.adminScreens.activity.MainActivity"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <activity
+            android:name=".mainScreens.beatScreens.BeatActivity"
+            android:label=""
+            android:screenOrientation="portrait">
+        </activity>
+
+        <!-- API key for the Android Maps API v2. The value is defined as a string resource. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key"/>
+
+        <activity
+            android:name=".mainScreens.beatScreens.ReportedImagesActivity"
+            android:label="">
+        </activity>
+        <activity android:name=".mainScreens.ProfileActivity"
+            android:label="">
         </activity>
     </application>
 

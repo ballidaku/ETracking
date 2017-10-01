@@ -2,8 +2,72 @@
     <string name="app_name">ETracking</string>
 
     <string-array name="userType">
-        <item >Admin</item>
-        <item>User</item>
+        <item>Admin</item>
+        <item>SubAdmin</item>
+        <item>Beat</item>
 
     </string-array>
+
+
+    <string-array name="rangeName">
+        <item>Nagrota Surian</item>
+        <item>Dhameta</item>
+    </string-array>
+
+    <string-array name="nagrotaBlock">
+        <item>Dehra</item>
+        <item>Nagrota Surian</item>
+    </string-array>
+
+    <string-array name="nagrotaDehraBeat">
+        <item>Dehra</item>
+        <item>Bhatoli Phakorian</item>
+    </string-array>
+
+    <string-array name="nagrotaNagrotaBeat">
+        <item>Nagrota Surian</item>
+        <item>Jawali</item>
+    </string-array>
+
+
+
+    <string-array name="dhametaBlock">
+        <item>Dhameta</item>
+        <item>Sansarpur Terrace</item>
+    </string-array>
+
+
+    <string-array name="dhametaDhametaBeat">
+        <item>Dhameta</item>
+        <item>Pong Dam</item>
+    </string-array>
+
+    <string-array name="dhametaSansarpurBeat">
+        <item>Sansarpur Terrace</item>
+        <item>Dadasiba</item>
+    </string-array>
+
+
+
+    <string-array name="nagrotaSurianBeat">
+        <item>Nagrota Surian</item>
+        <item>Jawali</item>
+    </string-array>
+
+
+
+
+
+
+    <string name="permission">Please enable all permission</string>
+    <string name="latitude_label">Latitude</string>
+    <string name="longitude_label">Longitude</string>
+    <string name="last_update_time_label">Last location update time</string>
+    <string name="location_updated_message">Location updated</string>
+
+    <string name="google_maps_key">AIzaSyDtzPz0wp8FDjcbHmrU6cYQoTOvRW9wHCM</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>
