@@ -2,10 +2,14 @@ package com.ballidaku.etracking.commonClasses;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
@@ -14,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -27,14 +32,19 @@ import android.widget.Toast;
 
 import com.ballidaku.etracking.R;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -45,8 +55,8 @@ import java.util.regex.Pattern;
 public class CommonMethods
 {
 
-    String TAG = "CommonMethods";
-    static CommonMethods instance = new CommonMethods();
+    private String TAG = "CommonMethods";
+    private static CommonMethods instance = new CommonMethods();
 
     public static CommonMethods getInstance()
     {
@@ -124,49 +134,37 @@ public class CommonMethods
     }
 
 
-    public String getCurrentDate()
-    {
-        return new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-    }
-
-    public String getCurrentDateTimeForName()
-    {
-        return new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-    }
-
-    public String getCurrentDateTime()
-    {
-        return new SimpleDateFormat("dd MM yyyy HH:mm:ss aaa").format(new Date());
-    }
-
     public void showImageGlide(Context context, ImageView imageView, String path)
     {
         Glide.with(context)
-                .load(path)
-                .centerCrop()
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into(imageView);
+             .load(path)
+             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher))
+             .into(imageView);
     }
 
-    public void showImageGlide2(Context context, final ZoomableImageView zoomableImageView, String path)
+    /*public void showImageGlide2(Context context, final ZoomableImageView zoomableImageView, String path)
     {
 
-       // CommonDialogs.getInstance().progressDialog(context);
+        // CommonDialogs.getInstance().progressDialog(context);
         Glide.with(context)
-                .load(path)
-                .asBitmap()
-                //.placeholder(R.drawable.default_placeholder)
-                .override(1600, 1600)
-                .into(new BitmapImageViewTarget(zoomableImageView) {
-                    @Override
-                    public void onResourceReady(Bitmap  bitmap, GlideAnimation anim) {
-                        super.onResourceReady(bitmap, anim);
-                       // CommonDialogs.getInstance().dialog.dismiss();
-                        zoomableImageView.setImageBitmap(bitmap);
-                    }
-                });
-    }
+             .load(path)
+             .asBitmap()
+             //.placeholder(R.drawable.default_placeholder)
+             .override(1600, 1600)
+             .into(new BitmapImageViewTarget(zoomableImageView)
+             {
+                 @Override
+                 public void onResourceReady(Bitmap bitmap, GlideAnimation anim)
+                 {
+                     super.onResourceReady(bitmap, anim);
+                     // CommonDialogs.getInstance().dialog.dismiss();
+                     zoomableImageView.setImageBitmap(bitmap);
+                 }
+             });
+    }*/
+
+
+
 
     public void switchfragment(Fragment fromWhere, Fragment toWhere)
     {
@@ -174,7 +172,6 @@ public class CommonMethods
         fragmentTransaction.replace(R.id.container_body, toWhere);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
-
 
 
     }
@@ -241,8 +238,16 @@ public class CommonMethods
     {
         File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "IMG_Temp.jpg");
 
-        Log.e(TAG,"Path "+outputFile.toString());
+        Log.e(TAG, "Path " + outputFile.toString());
         return Uri.fromFile(outputFile);
+    }
+
+    public File getTempraryImageFile2()
+    {
+        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "IMG_Temp.jpg");
+
+        Log.e(TAG, "Path " + outputFile.toString());
+        return outputFile;
     }
 
     public void deleteTempraryImage()
@@ -253,7 +258,8 @@ public class CommonMethods
 
     }
 
-    void deleteRecursive(File fileOrDirectory) {
+    void deleteRecursive(File fileOrDirectory)
+    {
         if (fileOrDirectory.isDirectory())
             for (File child : fileOrDirectory.listFiles())
                 deleteRecursive(child);
@@ -288,37 +294,43 @@ public class CommonMethods
     }
 
 
-
-    public String distanceBetweenLatLong(String latLong1,String latLong2 )
+    public float distanceBetweenLatLong(String latLong1, String latLong2)
     {
-        String[] latLong11=latLong1.split(",");
-        double lat1=Double.parseDouble(latLong11[0]);
-        double lon1=Double.parseDouble(latLong11[1]);
+        String[] latLong11 = latLong1.split(",");
+        double lat1 = Double.parseDouble(latLong11[0]);
+        double lon1 = Double.parseDouble(latLong11[1]);
 
         Location loc1 = new Location("");
         loc1.setLatitude(lat1);
         loc1.setLongitude(lon1);
 
 
-        String[] latLong22=latLong2.split(",");
-        double lat2=Double.parseDouble(latLong22[0]);
-        double lon2=Double.parseDouble(latLong22[1]);
+        String[] latLong22 = latLong2.split(",");
+        double lat2 = Double.parseDouble(latLong22[0]);
+        double lon2 = Double.parseDouble(latLong22[1]);
 
 
         Location loc2 = new Location("");
         loc2.setLatitude(lat2);
         loc2.setLongitude(lon2);
 
-        float distanceInMeters = loc1.distanceTo(loc2)/1000;
+        float distanceInMeters = loc1.distanceTo(loc2) / 1000;
+        Log.e(TAG,"distanceInMeters "+distanceInMeters);
 
-        return String.valueOf(new DecimalFormat("##.##").format(distanceInMeters))+" Km";
+        //return String.valueOf(new DecimalFormat("##.##").format(distanceInMeters)) + " Km";
+        return distanceInMeters;
     }
 
-    public String getTimeTaken(String startTime, String endTime)
+    public String getDistanceFormat(float distanceInMeters)
+    {
+        return String.valueOf(new DecimalFormat("##.##").format(distanceInMeters)) + " Km";
+    }
+
+    public int getTimeTaken(String startTime, String endTime)
     {
 
-        Log.e(TAG,"startTime "+startTime+" endTime "+endTime);
-        String timeTaken="";
+        Log.e(TAG, "startTime " + startTime + " endTime " + endTime);
+        int timeInSeconds = 0;
         try
         {
             SimpleDateFormat inputDateFormat = new SimpleDateFormat("dd-mm-yyyy hh:mm:ss aa", Locale.US);
@@ -327,40 +339,237 @@ public class CommonMethods
 
             long difference = date2.getTime() - date1.getTime();
 
-            int timeInSeconds = (int)difference / 1000;
+            timeInSeconds = (int) difference / 1000;
 
-            int hours = timeInSeconds / 3600;
 
-            timeInSeconds = timeInSeconds - (hours * 3600);
-
-            int min =timeInSeconds / 60;
-
-            timeTaken= hours+"h : "+min+"m";
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return timeTaken;
+        return timeInSeconds;
+    }
+
+    public String getTimeFormat(int timeInSeconds)
+    {
+
+        int hours = timeInSeconds / 3600;
+
+        timeInSeconds = timeInSeconds - (hours * 3600);
+
+        int min = timeInSeconds / 60;
+
+        return hours + "h : " + min + "m";
+    }
+
+    public Date stringToDate(String dateString)
+    {
+        Date date = null;
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+        try
+        {
+            date = format.parse(dateString);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        return date;
+    }
+
+    public String getCurrentDate()
+    {
+        return new SimpleDateFormat("dd-MM-yyyy", Locale.US).format(new Date());
+    }
+
+    public String getCurrentDateTimeForName()
+    {
+        return new SimpleDateFormat("yyyyMMdd_hhmmss", Locale.US).format(new Date());
+    }
+
+    public String getCurrenTime()
+    {
+        return new SimpleDateFormat("hh:mm:ss", Locale.US).format(new Date());
+    }
+
+    public String convertTimeStampToDateTime(long timeStamp)
+    {
+        String dateTime;
+
+        SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa", Locale.US);
+        dateTime = sfd.format(new Date(timeStamp));
+
+        // Log.e(TAG,"dateTime "+dateTime);
+
+        return dateTime;
+    }
+
+    public String convertDateToDateFormat(String date)
+    {
+        String dateLocal = null;
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd MMM yyyy", Locale.US);
+        try
+        {
+            dateLocal = outputFormat.format(inputFormat.parse(date));
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        return dateLocal;
+    }
+
+    public String convertTimeToTimeFormat(String time)
+    {
+        String timeLocal = null;
+
+        SimpleDateFormat inputFormat = new SimpleDateFormat("hh:mm:ss aa", Locale.US);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("hh:mm aa", Locale.US);
+        try
+        {
+            timeLocal = outputFormat.format(inputFormat.parse(time));
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        return timeLocal;
+    }
+
+    public String getFirstLastDateOfMonth(Calendar calendar, boolean b)
+    {
+        Calendar calendarLocal = Calendar.getInstance();
+        calendarLocal.setTime(calendar.getTime());
+
+        calendarLocal.add(Calendar.MONTH, b == true ? 1 : 0);
+        calendarLocal.set(Calendar.DAY_OF_MONTH, 1);
+        calendarLocal.add(Calendar.DATE, b == true ? -1 : 0);
+
+        Date lastDayOfMonth = calendarLocal.getTime();
+
+        DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+
+        return sdf.format(lastDayOfMonth);
+    }
+
+    public ArrayList<String> getMonthDates(Calendar calendar)
+    {
+        String startDate = getFirstLastDateOfMonth(calendar, false);
+        ;
+        String lasttDate = getFirstLastDateOfMonth(calendar, true);
+
+        Log.e(TAG, "startDate " + startDate + " lasttDate " + lasttDate);
+        //Log.e(TAG,"Month Dates "+getDates(startDate,lasttDate));
+
+        return getDates(startDate, lasttDate);
     }
 
 
+    private static ArrayList<String> getDates(String dateString1, String dateString2)
+    {
+        ArrayList<String> dates = new ArrayList<String>();
+        DateFormat df1 = new SimpleDateFormat("dd", Locale.US);
+
+        Date date1 = null;
+        Date date2 = null;
+
+        try
+        {
+            date1 = df1.parse(dateString1);
+            date2 = df1.parse(dateString2);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(date1);
 
 
-   public  class OnSpinnerItemSelected implements AdapterView.OnItemSelectedListener
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(date2);
+
+        while (!cal1.after(cal2))
+        {
+            dates.add(df1.format(cal1.getTime()));
+            cal1.add(Calendar.DATE, 1);
+        }
+        return dates;
+    }
+
+    public String getPreviousMonthYear(Calendar calendar)
+    {
+        calendar.add(Calendar.MONTH, -1);
+
+        Date lastDayOfMonth = calendar.getTime();
+
+        DateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.US);
+
+        return sdf.format(lastDayOfMonth);
+
+    }
+
+    public String getNextMonthYear(Calendar calendar)
+    {
+        calendar.add(Calendar.MONTH, +1);
+
+        Date lastDayOfMonth = calendar.getTime();
+
+        DateFormat sdf = new SimpleDateFormat("MMM yyyy", Locale.US);
+
+        return sdf.format(lastDayOfMonth);
+
+    }
+
+    public String getCurrentMonthYear()
+    {
+        return new SimpleDateFormat("MMM yyyy", Locale.US).format(new Date());
+    }
+
+    public boolean checkDateLiesInPresentMonth(Calendar calendar, String givenDate)
+    {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+
+        //set the given date in one of the instance and current date in another
+        cal1.setTime(stringToDate(givenDate));
+        cal2.setTime(calendar.getTime());
+
+        //now compare the dates using functions
+        if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
+        {
+            if (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH))
+            {
+                return true;
+
+            }
+        }
+
+        return false;
+    }
+
+
+    public class OnSpinnerItemSelected implements AdapterView.OnItemSelectedListener
     {
         Spinner spinner;
+
         public OnSpinnerItemSelected(Spinner spinner)
         {
-            this.spinner=spinner;
+            this.spinner = spinner;
         }
 
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
         {
-            view.setPadding(0, 0, 0,0);
-            TextView textViewSpinner=(TextView)view.findViewById(R.id.textViewSpinner);
+            view.setPadding(0, 0, 0, 0);
+            TextView textViewSpinner = (TextView) view.findViewById(R.id.textViewSpinner);
             textViewSpinner.setGravity(Gravity.RIGHT);
         }
 
@@ -370,6 +579,99 @@ public class CommonMethods
 
         }
     }
+
+    public void call(Context context, String number)
+    {
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + number));
+        context.startActivity(intent);
+    }
+
+
+    public class SpacesItemDecoration extends RecyclerView.ItemDecoration
+    {
+
+        private int spanCount;
+        private int spacing;
+        private boolean includeEdge;
+
+        public SpacesItemDecoration(int spanCount, int spacing, boolean includeEdge)
+        {
+            this.spanCount = spanCount;
+            this.spacing = spacing;
+            this.includeEdge = includeEdge;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
+        {
+            int position = parent.getChildAdapterPosition(view); // item position
+            int column = position % spanCount; // item column
+
+            if (includeEdge)
+            {
+                outRect.left = spacing - column * spacing / spanCount; // spacing - column * ((1f / spanCount) * spacing)
+                outRect.right = (column + 1) * spacing / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
+
+                if (position < spanCount)
+                { // top edge
+                    outRect.top = spacing;
+                }
+                outRect.bottom = spacing; // item bottom
+            }
+            else
+            {
+                outRect.left = column * spacing / spanCount; // column * ((1f / spanCount) * spacing)
+                outRect.right = spacing - (column + 1) * spacing / spanCount; // spacing - (column + 1) * ((1f /    spanCount) * spacing)
+                if (position >= spanCount)
+                {
+                    outRect.top = spacing; // item top
+                }
+            }
+        }
+    }
+
+
+    public String getAddress(Context context, String latLong)
+    {
+
+        String add = "";
+        String[] latLongArray = latLong.split(",");
+        double lat = Double.parseDouble(latLongArray[0]);
+        double lng = Double.parseDouble(latLongArray[1]);
+
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try
+        {
+            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
+            Address obj = addresses.get(0);
+            add = obj.getAddressLine(0);
+            //add = add + "\n" + obj.getCountryName();
+            //add = add + "\n" + obj.getCountryCode();
+            //add = add + "\n" + obj.getAdminArea();
+            //add = add + "\n" + obj.getPostalCode();
+            //add = add + "\n" + obj.getSubAdminArea();
+            //add = add + "\n" + obj.getLocality();
+            //add = add + "\n" + obj.getSubThoroughfare();
+
+            Log.v("IGA", "Address" + add);
+
+
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return add;
+    }
+
+
+
+
+
+
 
 
    /* public String encrypt(Context context, String message)

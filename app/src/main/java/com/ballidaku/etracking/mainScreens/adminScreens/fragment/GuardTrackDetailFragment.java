@@ -13,14 +13,18 @@ import android.view.ViewGroup;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.adapters.GuardTrackDetailsAdapter;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
+import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.SimpleDividerItemDecoration;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by sharanpalsingh on 27/09/17.
@@ -75,6 +79,7 @@ public class GuardTrackDetailFragment extends Fragment implements View.OnClickLi
         beatID = getArguments().getString(MyConstant.BEAT_ID);
 
         recycleViewGuardTrackDates = (RecyclerView) view.findViewById(R.id.recycleViewGuardTrackDates);
+       view.findViewById(R.id.buttonShowGraph).setOnClickListener(this);
 
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
@@ -107,6 +112,18 @@ public class GuardTrackDetailFragment extends Fragment implements View.OnClickLi
 
                // CommonDialogs.getInstance().selectBeatDateDialog(context,beatName,arrayList);
 
+
+
+                Collections.sort(arrayList, new Comparator<BeatLocationModel>() {
+                    public int compare(BeatLocationModel o1, BeatLocationModel o2) {
+                        if (o1.getDate() == null || o2.getDate() == null)
+                            return 0;
+                        return CommonMethods.getInstance().stringToDate(o1.getDate()).compareTo(CommonMethods.getInstance().stringToDate(o2.getDate()));
+                    }
+                });
+
+                Collections.reverse(arrayList);
+
                 refreshAdapter(arrayList);
 
             }
@@ -129,7 +146,30 @@ public class GuardTrackDetailFragment extends Fragment implements View.OnClickLi
         switch (v.getId())
         {
 
+            case R.id.buttonShowGraph:
+
+                ArrayList<BeatLocationModel> arrayList2  = new ArrayList<>();
+                arrayList2.addAll(arrayList);
+
+                Collections.reverse(arrayList2);
+                Gson gson = new Gson();
+                Bundle bundle=new Bundle();
+                bundle.putString(MyConstant.LIST,gson.toJson(arrayList2));
+                bundle.putString(MyConstant.BEAT_NAME,beatName);
+
+                GraphFragment graphFragment=new GraphFragment();
+                graphFragment.setArguments(bundle);
+
+                CommonMethods.getInstance().switchfragment(this,graphFragment);
+
+                getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+
+                break;
 
         }
     }
+
+
+
+
 }

@@ -5,32 +5,37 @@
         <item
             android:id="@+id/nav_track_beats"
             android:icon="@drawable/ic_beat_location"
-            android:title="Track Guard" />
-        <!--<item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:title="Track Guard"/>
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />-->
+            android:id="@+id/nav_search_guard"
+            android:icon="@drawable/ic_search"
+            android:title="Search Guards"/>
+        <!-- <item
+             android:id="@+id/nav_slideshow"
+             android:icon="@drawable/ic_menu_slideshow"
+             android:title="Slideshow" />-->
         <item
             android:id="@+id/nav_reported_images"
             android:icon="@drawable/ic_reported_image"
-            android:title="Reported Images" />
+            android:title="Reported Images"/>
+
+        <item
+            android:id="@+id/nav_reported_offence"
+            android:icon="@mipmap/ic_offence"
+            android:title="Reported Offence"/>
     </group>
 
-   <!-- <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_user_type"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_user_type"
-                android:title="Send" />
-        </menu>
-    </item>-->
+    <!-- <item android:title="Communicate">
+         <menu>
+             <item
+                 android:id="@+id/nav_share"
+                 android:icon="@drawable/ic_user_type"
+                 android:title="Share" />
+             <item
+                 android:id="@+id/nav_send"
+                 android:icon="@drawable/ic_user_type"
+                 android:title="Send" />
+         </menu>
+     </item>-->
 
 </menu>

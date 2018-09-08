@@ -4,13 +4,21 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ballidaku.etracking.R;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 /**
  * Created by sharanpalsingh on 15/09/17.
@@ -95,7 +103,7 @@ public class CommonDialogs
     }
 
 
-    /*public void selectBeatDialog(Context context, ArrayList<BeatDataModel> arrayList)
+    /*public void selectBeatDialog(Context context, ArrayList<GuardDataModel> arrayList)
     {
         dialog = new Dialog(context, R.style.DialogTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -150,7 +158,7 @@ public class CommonDialogs
 
 
 
-    public void zoomableImageViewDialog(Context context, String path)
+  /*  public void zoomableImageViewDialog(Context context, String path)
     {
         dialog = new Dialog(context, R.style.DialogTheme);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -163,9 +171,52 @@ public class CommonDialogs
        // ImageView zoomableImageView = (ImageView) dialog.findViewById(R.id.imageViewZoomable);
 
 
-        CommonMethods.getInstance().showImageGlide2(context,zoomableImageView,path);
+        //CommonMethods.getInstance().showImageGlide2(context,zoomableImageView,path);
 
         dialog.show();
 
+    }*/
+
+
+    public void showImage(Context context,String image, String title)
+    {
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_image);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        dialog.show();
+        final ImageView cou_bck_iv = dialog.findViewById(R.id.cou_bck_iv);
+        final ImageView imageview = dialog.findViewById(R.id.imageview);
+        TextView name = dialog.findViewById(R.id.name);
+        final ProgressBar progress = dialog.findViewById(R.id.progress);
+        name.setText(title != null ? title : "");
+        /* Glide.with(context).load(image).apply(RequestOptions.placeholderOf(R.mipmap.picture)).into(chat_iv);*/
+        Glide.with(context).load(image).listener(new RequestListener<Drawable>()
+        {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource)
+            {
+                progress.setVisibility(View.GONE);
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource)
+            {
+                progress.setVisibility(View.GONE);
+                return false;
+            }
+
+        }).into(imageview);
+        cou_bck_iv.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                dialog.dismiss();
+            }
+        });
+        dialog.setCanceledOnTouchOutside(true);
     }
 }

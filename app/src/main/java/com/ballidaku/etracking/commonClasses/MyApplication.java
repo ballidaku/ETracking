@@ -2,6 +2,10 @@ package com.ballidaku.etracking.commonClasses;
 
 import android.app.Application;
 
+import com.crashlytics.android.Crashlytics;
+
+import io.fabric.sdk.android.Fabric;
+
 /**
  * Created by sharanpalsingh on 17/09/17.
  */
@@ -20,6 +24,7 @@ public class MyApplication extends Application
     public void onCreate()
     {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
       //  FirebaseDatabase.getInstance().setPersistenceEnabled(true);
     }
 

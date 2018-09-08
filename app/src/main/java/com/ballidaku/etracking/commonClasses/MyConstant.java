@@ -13,6 +13,7 @@ public class MyConstant
     public static final String USER_NAME="user_name";
     public static final String USER_EMAIL="user_email";
     public static final String USER_PHONE="user_phone";
+    public static final String USER_ALLOWED="user_allowed";
 
 
     public static final String USER_TYPE="user_type";
@@ -24,6 +25,7 @@ public class MyConstant
     public static final String LAST_LOCATION="last_location";
 
     public static final String REPORTED_IMAGES="reported_images";
+    public static final String REPORTED_OFFENCE="reported_offence";
     public static final String REPORTED_TIME="reported_time";
     public static final String IMAGE_PATH="image_path";
 
@@ -54,5 +56,10 @@ public class MyConstant
     public static final String HEADQUATER="headquater";
 
 
-    public static final String MPIN="mpin";
+    public static final String LIST="list";
+    public static final String IMAGE="image";
+    public static final String OFFENCE="offence";
+
+    public static final String SPECIESNAME="species_name";
+    public static final String DESCRIPTION="description";
 }

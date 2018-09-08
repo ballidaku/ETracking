@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,7 +23,7 @@ import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.SimpleDividerItemDecoration;
-import com.ballidaku.etracking.dataModels.BeatDataModel;
+import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
     RecyclerView recycleViewBeat;
     GuardsSelectionAdapter beatSelectionAdapter;
 
-    ArrayList<BeatDataModel> arrayList = new ArrayList<>();
+    ArrayList<GuardDataModel> arrayList = new ArrayList<>();
 
 
     @Override
@@ -76,6 +77,7 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
         super.onResume();
 
         ((MainActivity)getActivity()).toolbar.setTitle("Track Guard");
+        ((MainActivity)getActivity()).refreshMenu(0);
     }
 
     private void setUpViews()
@@ -227,7 +229,28 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
 
 
         recycleViewBeat = (RecyclerView) view.findViewById(R.id.recycleViewBeat);
+        recycleViewBeat.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                int action = e.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_MOVE:
+                        rv.getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                }
+                return false;
+            }
 
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+            }
+        });
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);
         recycleViewBeat.setLayoutManager(layoutManager);
@@ -237,10 +260,12 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
         beatSelectionAdapter = new GuardsSelectionAdapter(this,context, arrayList);
 
         recycleViewBeat.setAdapter(beatSelectionAdapter);
+
+
     }
 
 
-    void refreshAdapter(ArrayList<BeatDataModel> arrayList)
+    void refreshAdapter(ArrayList<GuardDataModel> arrayList)
     {
         CommonDialogs.getInstance().dialog.dismiss();
 
@@ -264,7 +289,7 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
                 MyFirebase.getInstance().getBeatsByCategory(range,block,beat,new Interfaces.GetAllBeatListener()
                 {
                     @Override
-                    public void callback(ArrayList<BeatDataModel> arrayList)
+                    public void callback(ArrayList<GuardDataModel> arrayList)
                     {
                         refreshAdapter(arrayList);
                     }
@@ -273,7 +298,7 @@ public class SearchGuardByCategoryFragment extends Fragment implements View.OnCl
                 /*MyFirebase.getInstance().getAllBeats(new Interfaces.GetAllBeatListener()
                 {
                     @Override
-                    public void callback(ArrayList<BeatDataModel> arrayList)
+                    public void callback(ArrayList<GuardDataModel> arrayList)
                     {
                         refreshAdapter(arrayList);
                     }

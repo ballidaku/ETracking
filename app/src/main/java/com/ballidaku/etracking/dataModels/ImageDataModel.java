@@ -9,16 +9,28 @@ public class ImageDataModel
 
     String image_path;
     String reported_time;
+    String reportedBy;
+    String beatID;
+    String reportedImageID;
+
+    public String getReportedBy()
+    {
+        return reportedBy;
+    }
 
     public ImageDataModel()
     {
-
     }
 
-    public ImageDataModel(String image_path, String reported_time)
+    public ImageDataModel(String image_path, String reported_time,String reportedBy,
+                          String beatID,
+                          String reportedImageID)
     {
         this.image_path=image_path;
         this.reported_time=reported_time;
+        this.reportedBy=reportedBy;
+        this.beatID=beatID;
+        this.reportedImageID=reportedImageID;
     }
 
     public String getImagePath()
@@ -26,18 +38,20 @@ public class ImageDataModel
         return image_path;
     }
 
-    public void setImagePath(String imagePath)
-    {
-        this.image_path = imagePath;
-    }
 
     public String getReportedTime()
     {
         return reported_time;
     }
 
-    public void setReportedTime(String reportedTime)
+
+    public String getBeatID()
     {
-        this.reported_time = reportedTime;
+        return beatID;
+    }
+
+    public String getReportedImageID()
+    {
+        return reportedImageID;
     }
 }

@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.adapters.ReportedImagesAdapter;
+import com.ballidaku.etracking.commonClasses.CommonDialogs;
+import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
@@ -67,9 +69,15 @@ public class ReportedImagesActivity extends AppCompatActivity
 
         recyclerViewReportedImages=(RecyclerView)findViewById(R.id.recyclerViewReportedImages);
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 4);
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 2);
         recyclerViewReportedImages.setLayoutManager(layoutManager);
         recyclerViewReportedImages.setItemAnimator(new DefaultItemAnimator());
+
+        int spanCount = 2; // 3 columns
+        int spacing = 20; // 50px
+        boolean includeEdge = true;
+
+        recyclerViewReportedImages.addItemDecoration( CommonMethods.getInstance().new SpacesItemDecoration(spanCount,spacing,includeEdge));
 
 //        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewReportedImages.getContext(),
 //                layoutManager.getOrientation());
@@ -83,13 +91,14 @@ public class ReportedImagesActivity extends AppCompatActivity
 
     private void getFirebaseImages()
     {
-
+        CommonDialogs.getInstance().progressDialog(context);
         MyFirebase.getInstance().getFirebaseImages(context, new Interfaces.ReportedImagesListener()
         {
             @Override
             public void callback(ArrayList<ImageDataModel> arrayList)
             {
                 reportedImagesAdapter.refresh(arrayList);
+                CommonDialogs.getInstance().dialog.dismiss();
             }
         });
     }

@@ -400,6 +400,7 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
                                 hashMap.put(MyConstant.USER_NAME,name);
                                 hashMap.put(MyConstant.USER_EMAIL,email);
                                 hashMap.put(MyConstant.USER_PHONE,phoneNumber);
+                                hashMap.put(MyConstant.USER_ALLOWED,"false");
 
                                 String userType=(String)spinnerUserType.getSelectedItem();
                                 if(userType.equals("Admin"))

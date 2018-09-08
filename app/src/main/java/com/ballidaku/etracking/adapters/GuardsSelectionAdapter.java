@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.MyConstant;
-import com.ballidaku.etracking.dataModels.BeatDataModel;
+import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.GuardTrackDetailFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.SearchGuardByCategoryFragment;
 
@@ -27,12 +27,12 @@ public class GuardsSelectionAdapter extends RecyclerView.Adapter<GuardsSelection
 
     String TAG="GuardsSelectionAdapter";
 
-    private ArrayList<BeatDataModel> arrayList;
+    private ArrayList<GuardDataModel> arrayList;
     private Context context;
     SearchGuardByCategoryFragment searchGuardByCategoryFragment;
 
 
-    public GuardsSelectionAdapter(SearchGuardByCategoryFragment searchGuardByCategoryFragment, Context context, ArrayList<BeatDataModel> arrayList)
+    public GuardsSelectionAdapter(SearchGuardByCategoryFragment searchGuardByCategoryFragment, Context context, ArrayList<GuardDataModel> arrayList)
     {
         this.context = context;
         this.arrayList = arrayList;
@@ -40,7 +40,7 @@ public class GuardsSelectionAdapter extends RecyclerView.Adapter<GuardsSelection
     }
 
 
-    public void refresh(ArrayList<BeatDataModel> arrayList)
+    public void refresh(ArrayList<GuardDataModel> arrayList)
     {
         this.arrayList = arrayList;
     }

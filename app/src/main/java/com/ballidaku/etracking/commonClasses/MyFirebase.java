@@ -3,17 +3,19 @@ package com.ballidaku.etracking.commonClasses;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.ballidaku.etracking.R;
-import com.ballidaku.etracking.dataModels.BeatDataModel;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
+import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
+import com.ballidaku.etracking.dataModels.OffenceDataModel;
+import com.ballidaku.etracking.frontScreens.LoginActivity;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.BeatActivity;
+import com.ballidaku.etracking.mainScreens.beatScreens.ReportOffenceActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -22,12 +24,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,11 +109,21 @@ public class MyFirebase
             {
                 if (task.isSuccessful())
                 {
-                    openActivity(context, userID, userType, result);
+                    //openActivity(context, userID, userType, result);
+                    openLogin(context);
                     CommonMethods.getInstance().show_Toast(context, "User created successfully");
                 }
             }
         });
+    }
+
+    public void openLogin(Context context)
+    {
+        Intent intent = new Intent(context, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+        ((Activity) context).overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+        ((Activity) context).finish();
     }
 
     public void logInUser(final Context context, final String email)
@@ -141,7 +153,15 @@ public class MyFirebase
 
                                 Log.e(TAG, "User hashMap " + hashMap);
 
-                                openActivity(context, child2.getKey(), child.getKey(), hashMap);
+                                if (hashMap.get(MyConstant.USER_ALLOWED).equals("true"))
+                                {
+                                    openActivity(context, child2.getKey(), child.getKey(), hashMap);
+                                }
+                                else
+                                {
+                                    dismissDialog();
+                                    CommonMethods.getInstance().show_Toast(context, "Contact DFO for permission to login");
+                                }
 
                             }
 
@@ -180,20 +200,31 @@ public class MyFirebase
         ((Activity) context).finish();
     }
 
-
-    public void saveUserLocation(Context context, HashMap<String, Object> hashMap)
+    public String getStartLoactionNode(Context context)
     {
+        String userID = MySharedPreference.getInstance().getUserID(context);
+
+        return root.child(MyConstant.LOCATION).child(userID).child(CommonMethods.getInstance().getCurrentDate()).push().getKey();
+    }
+
+    public void saveUserLocation(Context context, String startTrackKey, String locationString)
+    {
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put(MyConstant.LOCATION, locationString);
+        hashMap.put(MyConstant.TIME, ServerValue.TIMESTAMP);
+
 
         String userID = MySharedPreference.getInstance().getUserID(context);
         String userName = MySharedPreference.getInstance().getUserName(context);
 
-        root.child(MyConstant.LOCATION).child(userID).child(CommonMethods.getInstance().getCurrentDate()).push().updateChildren(hashMap);
+        root.child(MyConstant.LOCATION).child(userID).child(CommonMethods.getInstance().getCurrentDate()).child(startTrackKey).push().updateChildren(hashMap);
 
-        root.child(MyConstant.LAST_LOCATION).child(userID).setValue(userName + "," + hashMap.get(MyConstant.LOCATION));
+        //root.child(MyConstant.LAST_LOCATION).child(userID).setValue(userName + "," + hashMap.get(MyConstant.LOCATION));
     }
 
 
-    public void getBeatLocations(final Interfaces.GetBeatsListener getBeatsListener)
+/*    public void getBeatLocations(final Interfaces.GetBeatsListener getBeatsListener)
     {
         root.child(MyConstant.LAST_LOCATION).addValueEventListener(new ValueEventListener()
         {
@@ -203,7 +234,7 @@ public class MyFirebase
                 ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
                 for (DataSnapshot child : dataSnapshot.getChildren())
                 {
-                    Log.e(TAG, "BeatDataModel " + child);
+                    Log.e(TAG, "GuardDataModel " + child);
 
                     HashMap<String, Object> hashMap = new HashMap<String, Object>();
                     hashMap.put(MyConstant.BEAT_ID, child.getKey());
@@ -223,7 +254,7 @@ public class MyFirebase
 
             }
         });
-    }
+    }*/
 
     //**********************************************************************************************
     //**********************************************************************************************
@@ -231,7 +262,7 @@ public class MyFirebase
     //**********************************************************************************************
     //**********************************************************************************************
 
-    public void saveImage(final Context context, Bitmap bitmap)
+    public void saveImage(final Context context/* Bitmap bitmap,*/, String imagePath, final String imageOffence, final HashMap<String, Object> hashMap)
     {
 
         showDialog(context);
@@ -245,11 +276,12 @@ public class MyFirebase
         StorageReference mountainImagesRef = storageRef.child("images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
 
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] data = baos.toByteArray();
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+//        byte[] data = baos.toByteArray();
 
-        UploadTask uploadTask = mountainImagesRef.putBytes(data);
+//        UploadTask uploadTask = mountainImagesRef.putBytes(data);
+        UploadTask uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + imagePath));
         uploadTask.addOnFailureListener(new OnFailureListener()
         {
             @Override
@@ -268,13 +300,47 @@ public class MyFirebase
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
             {
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                String downloadUrl = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
 
                 Log.e(TAG, "ImagePath " + downloadUrl);
 
                 CommonMethods.getInstance().deleteTempraryImage();
+                CompressionClass.getInstance().deleteDirctory();
 
-                reportImage(context, downloadUrl.toString());
+                if (imageOffence.equals(MyConstant.IMAGE))
+                {
+                    reportImage(context, downloadUrl);
+                }
+                else if (imageOffence.equals(MyConstant.OFFENCE))
+                {
+                    reportOffence(context, downloadUrl, hashMap);
+                }
+            }
+        });
+    }
+
+    private void reportOffence(final Context context, String path, HashMap<String, Object> hashMap)
+    {
+        hashMap.put(MyConstant.IMAGE_PATH, path);
+        hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
+
+        String latLong = BeatActivity.mCurrentLocation == null ? "" : BeatActivity.mCurrentLocation.getLatitude() + "," + BeatActivity.mCurrentLocation.getLongitude();
+
+        hashMap.put(MyConstant.LOCATION, latLong);
+
+        final String userID = MySharedPreference.getInstance().getUserID(context);
+        root.child(MyConstant.REPORTED_OFFENCE).child(userID).push().updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful())
+                {
+                    CommonMethods.getInstance().show_Toast(context, "Offence reported successfully");
+
+                    ((ReportOffenceActivity) context).finish();
+                }
+                dismissDialog();
             }
         });
     }
@@ -284,7 +350,8 @@ public class MyFirebase
     {
         HashMap<String, Object> hashMap = new HashMap<String, Object>();
         hashMap.put(MyConstant.IMAGE_PATH, path);
-        hashMap.put(MyConstant.REPORTED_TIME, CommonMethods.getInstance().getCurrentDateTime());
+        //hashMap.put(MyConstant.REPORTED_TIME, CommonMethods.getInstance().getCurrentDateTime());
+        hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
 
 
         final String userID = MySharedPreference.getInstance().getUserID(context);
@@ -323,9 +390,13 @@ public class MyFirebase
                 ArrayList<ImageDataModel> arrayList = new ArrayList<ImageDataModel>();
                 for (final DataSnapshot child1 : dataSnapshot.getChildren())
                 {
-                    //Log.e(TAG, ""+child.getValue());
+                    //Log.e(TAG, ""+child1.getValue());
 
-                    ImageDataModel imageDataModel = new ImageDataModel((String) child1.child(MyConstant.IMAGE_PATH).getValue(), (String) child1.child(MyConstant.REPORTED_TIME).getValue());
+                    ImageDataModel imageDataModel = new ImageDataModel((String) child1.child(MyConstant.IMAGE_PATH).getValue(),
+                            CommonMethods.getInstance().convertTimeStampToDateTime((long) child1.child(MyConstant.REPORTED_TIME).getValue()),
+                            "",
+                            "",
+                            "");
 
 
                     arrayList.add(imageDataModel);
@@ -346,6 +417,50 @@ public class MyFirebase
         });
     }
 
+
+    public void getFirebaseOffence(Context context, final Interfaces.ReportedOffenceListener reportedOffenceListener)
+    {
+
+        String userId = MySharedPreference.getInstance().getUserID(context);
+
+        root.child(MyConstant.REPORTED_OFFENCE).child(userId).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                ArrayList<OffenceDataModel> arrayList = new ArrayList<OffenceDataModel>();
+                for (final DataSnapshot child1 : dataSnapshot.getChildren())
+                {
+                    //Log.e(TAG, ""+child.getValue());
+
+                    OffenceDataModel imageDataModel = new OffenceDataModel((String) child1.child(MyConstant.IMAGE_PATH).getValue(),
+                            CommonMethods.getInstance().convertTimeStampToDateTime((long) child1.child(MyConstant.REPORTED_TIME).getValue()),
+                            "",
+                            (String) child1.child(MyConstant.DESCRIPTION).getValue(),
+                            (String) child1.child(MyConstant.SPECIESNAME).getValue(),
+                            (String) child1.child(MyConstant.LOCATION).getValue(),
+                            "",
+                            "");
+
+
+                    arrayList.add(imageDataModel);
+                    //  Log.e(TAG, "imagePath "+imageDataModel.getImagePath()+" Time "+imageDataModel.getReportedTime());
+
+
+                }
+
+                Collections.reverse(arrayList);
+                reportedOffenceListener.callback(arrayList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+
+            }
+        });
+    }
+
     public void getReportedImagesByAdmin(final Interfaces.ReportedImagesListener reportedImagesListener)
     {
         root.child(MyConstant.REPORTED_IMAGES).addListenerForSingleValueEvent(new ValueEventListener()
@@ -353,66 +468,157 @@ public class MyFirebase
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                ArrayList<ImageDataModel> arrayList = new ArrayList<ImageDataModel>();
+                final ArrayList<ImageDataModel> arrayList = new ArrayList<ImageDataModel>();
 
+                if (dataSnapshot.getValue() == null)
+                {
+                    CommonDialogs.getInstance().dialog.dismiss();
+                    return;
+                }
                 for (final DataSnapshot beatIds : dataSnapshot.getChildren())
                 {
 
-                    for (final DataSnapshot keys : beatIds.getChildren())
+                    Log.e(TAG, "beatIds.getKey() " + beatIds.getKey());
+
+                    root.child(MyConstant.USERS).child(MyConstant.BEAT).child(beatIds.getKey()).addListenerForSingleValueEvent(new ValueEventListener()
                     {
-                        //Log.e(TAG, ""+child.getValue());
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+                            String guardName = (String) dataSnapshot.child(MyConstant.USER_NAME).getValue();
 
-                        ImageDataModel imageDataModel = new ImageDataModel((String) keys.child(MyConstant.IMAGE_PATH).getValue(), (String) keys.child(MyConstant.REPORTED_TIME).getValue());
+                            for (final DataSnapshot keys : beatIds.getChildren())
+                            {
+                                ImageDataModel imageDataModel = new ImageDataModel((String) keys.child(MyConstant.IMAGE_PATH).getValue(),
+                                        CommonMethods.getInstance().convertTimeStampToDateTime((long) keys.child(MyConstant.REPORTED_TIME).getValue()),
+                                        guardName,
+                                        beatIds.getKey(),
+                                        keys.getKey());
 
+                                arrayList.add(imageDataModel);
+                                // Log.e(TAG, "imagePath "+imageDataModel.getImagePath()+" Time "+imageDataModel.getReportedTime());
+                            }
+                            Collections.reverse(arrayList);
+                            reportedImagesListener.callback(arrayList);
+                        }
 
-                        arrayList.add(imageDataModel);
-                        // Log.e(TAG, "imagePath "+imageDataModel.getImagePath()+" Time "+imageDataModel.getReportedTime());
-
-                    }
-
-                    Collections.reverse(arrayList);
-                    reportedImagesListener.callback(arrayList);
-
-
+                        @Override
+                        public void onCancelled(DatabaseError databaseError)
+                        {
+                        }
+                    });
                 }
-
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError)
             {
-
             }
         });
     }
 
 
-    public void getAllBeats(final Interfaces.GetAllBeatListener getAllBeatListener)
+    public void getReportedOffenceByAdmin(final Interfaces.ReportedOffenceListener reportedOffenceListener)
+    {
+
+        root.child(MyConstant.REPORTED_OFFENCE).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                final ArrayList<OffenceDataModel> arrayList = new ArrayList<OffenceDataModel>();
+
+                if (dataSnapshot.getValue() == null)
+                {
+                    CommonDialogs.getInstance().dialog.dismiss();
+                    return;
+                }
+                for (final DataSnapshot beatIds : dataSnapshot.getChildren())
+                {
+
+                    Log.e(TAG, "beatIds.getKey() " + beatIds.getKey());
+
+                    root.child(MyConstant.USERS).child(MyConstant.BEAT).child(beatIds.getKey()).addListenerForSingleValueEvent(new ValueEventListener()
+                    {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+
+
+                            String guardName = (String) dataSnapshot.child(MyConstant.USER_NAME).getValue();
+
+                            for (final DataSnapshot keys : beatIds.getChildren())
+                            {
+                                Log.e(TAG, "Offence.getKey() " + keys.getKey());
+                                /*OffenceDataModel offenceDataModel = new OffenceDataModel((String) keys.child(MyConstant.IMAGE_PATH).getValue(),
+                                        CommonMethods.getInstance().convertTimeStampToDateTime((long)keys.child(MyConstant.REPORTED_TIME).getValue()),
+                                        guardName);*/
+
+
+                                OffenceDataModel imageDataModel = new OffenceDataModel((String) keys.child(MyConstant.IMAGE_PATH).getValue(),
+                                        CommonMethods.getInstance().convertTimeStampToDateTime((long) keys.child(MyConstant.REPORTED_TIME).getValue()),
+                                        guardName,
+                                        (String) keys.child(MyConstant.DESCRIPTION).getValue(),
+                                        (String) keys.child(MyConstant.SPECIESNAME).getValue(),
+                                        (String) keys.child(MyConstant.LOCATION).getValue(),
+                                        beatIds.getKey(),
+                                        keys.getKey());
+
+                                arrayList.add(imageDataModel);
+                                // Log.e(TAG, "imagePath "+imageDataModel.getImagePath()+" Time "+imageDataModel.getReportedTime());
+                            }
+                            Collections.reverse(arrayList);
+                            reportedOffenceListener.callback(arrayList);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError)
+                        {
+                            Log.e(TAG, "1");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                Log.e(TAG, "2");
+            }
+        });
+    }
+
+    public void getAllGuards(final Interfaces.GetAllBeatListener getAllBeatListener)
     {
         root.child(MyConstant.USERS).child(MyConstant.BEAT).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                ArrayList<BeatDataModel> arrayList = new ArrayList<BeatDataModel>();
+                ArrayList<GuardDataModel> arrayList = new ArrayList<GuardDataModel>();
 
                 for (final DataSnapshot child : dataSnapshot.getChildren())
                 {
 
 
-                   Log.e(TAG, ""+child.child(MyConstant.USER_NAME).getValue());
+                    Log.e(TAG, "" + child.child(MyConstant.USER_NAME).getValue());
 
-                    BeatDataModel beatDataModel = new BeatDataModel();
+                    GuardDataModel beatDataModel = new GuardDataModel();
                     beatDataModel.setBeatId(child.getKey());
-                    beatDataModel.setBeatEmail((String)child.child(MyConstant.USER_EMAIL).getValue());
-                    beatDataModel.setBeatName((String)child.child(MyConstant.USER_NAME).getValue());
-                    beatDataModel.setBeatPhoneNumber((String)child.child(MyConstant.USER_PHONE).getValue());
+                    beatDataModel.setBeatEmail((String) child.child(MyConstant.USER_EMAIL).getValue());
+                    beatDataModel.setBeatName((String) child.child(MyConstant.USER_NAME).getValue());
+                    beatDataModel.setBeatPhoneNumber((String) child.child(MyConstant.USER_PHONE).getValue());
+
+                    beatDataModel.setBeatRange((String) child.child(MyConstant.RANGE).getValue());
+                    beatDataModel.setBeatBlock((String) child.child(MyConstant.BLOCK).getValue());
+                    beatDataModel.setBeatBeat((String) child.child(MyConstant.BEAT).getValue());
+                    beatDataModel.setBeatHeadquater((String) child.child(MyConstant.HEADQUATER).getValue());
 
                     arrayList.add(beatDataModel);
                 }
                 getAllBeatListener.callback(arrayList);
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError)
             {
@@ -420,7 +626,7 @@ public class MyFirebase
         });
     }
 
-    public void getBeatsByCategory(String range,String block,String beat,final Interfaces.GetAllBeatListener getAllBeatListener)
+    public void getBeatsByCategory(String range, String block, String beat, final Interfaces.GetAllBeatListener getAllBeatListener)
     {
         root.child(MyConstant.USERS).child(MyConstant.BEAT)/*.orderByChild(MyConstant.RANGE).equalTo(range)*/
                 //.orderByChild(MyConstant.BLOCK).equalTo(block)
@@ -429,24 +635,25 @@ public class MyFirebase
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                ArrayList<BeatDataModel> arrayList = new ArrayList<BeatDataModel>();
+                ArrayList<GuardDataModel> arrayList = new ArrayList<GuardDataModel>();
 
                 for (final DataSnapshot child : dataSnapshot.getChildren())
                 {
 
 
-                    Log.e(TAG, ""+child.child(MyConstant.USER_NAME).getValue());
+                    Log.e(TAG, "" + child.child(MyConstant.USER_NAME).getValue());
 
-                    BeatDataModel beatDataModel = new BeatDataModel();
+                    GuardDataModel beatDataModel = new GuardDataModel();
                     beatDataModel.setBeatId(child.getKey());
-                    beatDataModel.setBeatEmail((String)child.child(MyConstant.USER_EMAIL).getValue());
-                    beatDataModel.setBeatName((String)child.child(MyConstant.USER_NAME).getValue());
-                    beatDataModel.setBeatPhoneNumber((String)child.child(MyConstant.USER_PHONE).getValue());
+                    beatDataModel.setBeatEmail((String) child.child(MyConstant.USER_EMAIL).getValue());
+                    beatDataModel.setBeatName((String) child.child(MyConstant.USER_NAME).getValue());
+                    beatDataModel.setBeatPhoneNumber((String) child.child(MyConstant.USER_PHONE).getValue());
 
                     arrayList.add(beatDataModel);
                 }
                 getAllBeatListener.callback(arrayList);
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError)
             {
@@ -454,7 +661,7 @@ public class MyFirebase
         });
     }
 
-    public void getBeatDateLocationData(String beatId,final Interfaces.GetBeatDateLocationListener getBeatDateLocationListener)
+    public void getBeatDateLocationData(String beatId, final Interfaces.GetBeatDateLocationListener getBeatDateLocationListener)
     {
         root.child(MyConstant.LOCATION).child(beatId).addListenerForSingleValueEvent(new ValueEventListener()
         {
@@ -468,18 +675,28 @@ public class MyFirebase
                     BeatLocationModel beatLocationModel = new BeatLocationModel();
                     beatLocationModel.setDate(child.getKey());
 
-                    ArrayList<BeatLocationModel.DateLocation> dateLocationArrayList = new ArrayList<BeatLocationModel.DateLocation>();
-                    for (final DataSnapshot date : child.getChildren())
+                    ArrayList<ArrayList<BeatLocationModel.DateLocation>> dateLocationArray = new ArrayList<>();
+                    for (final DataSnapshot startedBranch : child.getChildren())
                     {
+                        ArrayList<BeatLocationModel.DateLocation> dateLocationArrayList = new ArrayList<BeatLocationModel.DateLocation>();
+                        for (final DataSnapshot dataSnapshot1 : startedBranch.getChildren())
+                        {
 
-                        BeatLocationModel.DateLocation dateLocation=new BeatLocationModel.DateLocation();
-                        dateLocation.setLocation((String)date.child(MyConstant.LOCATION).getValue());
-                        dateLocation.setTime((String)date.child(MyConstant.TIME).getValue());
+                            BeatLocationModel.DateLocation dateLocation = new BeatLocationModel.DateLocation();
+                            dateLocation.setLocation((String) dataSnapshot1.child(MyConstant.LOCATION).getValue());
+                            Object objectTime = dataSnapshot1.child(MyConstant.TIME).getValue();
+                            if (objectTime != null)
+                            {
+                                dateLocation.setTime(CommonMethods.getInstance().convertTimeStampToDateTime((long) objectTime));
+                            }
 
-                        dateLocationArrayList.add(dateLocation);
+                            dateLocationArrayList.add(dateLocation);
+                        }
+                        dateLocationArray.add(dateLocationArrayList);
+
                     }
 
-                    beatLocationModel.setDateLocations(dateLocationArrayList);
+                    beatLocationModel.setDateLocations(dateLocationArray);
 
                     arrayList.add(beatLocationModel);
                 }
@@ -494,6 +711,46 @@ public class MyFirebase
             public void onCancelled(DatabaseError databaseError)
             {
 
+            }
+        });
+    }
+
+
+    public void deleteOffence(String beatID, String offenceID, final Interfaces.DeleteOffenceListener deleteOffenceListener)
+    {
+        root.child(MyConstant.REPORTED_OFFENCE).child(beatID).child(offenceID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful())
+                {
+                    deleteOffenceListener.onSuccess();
+                }
+                else
+                {
+                    deleteOffenceListener.onUnSuccess();
+                }
+            }
+        });
+    }
+
+
+    public void deleteReportedImage(String beatID, String reportedImageID, final Interfaces.DeleteReportedImageListener deleteReportedImageListener)
+    {
+        root.child(MyConstant.REPORTED_IMAGES).child(beatID).child(reportedImageID).removeValue().addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful())
+                {
+                    deleteReportedImageListener.onSuccess();
+                }
+                else
+                {
+                    deleteReportedImageListener.onUnSuccess();
+                }
             }
         });
     }

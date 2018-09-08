@@ -3,6 +3,7 @@ package com.ballidaku.etracking.adapters;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.GuardTrackDetailFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.GuardTrackMapFragment;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
@@ -25,7 +27,7 @@ import java.util.ArrayList;
 public class GuardTrackDetailsAdapter extends RecyclerView.Adapter<GuardTrackDetailsAdapter.MyViewHolder>
 {
 
-    String TAG="GuardsSelectionAdapter";
+    String TAG = "GuardTrackDetailsAdapter";
 
     private ArrayList<BeatLocationModel> arrayList;
     private Context context;
@@ -35,7 +37,7 @@ public class GuardTrackDetailsAdapter extends RecyclerView.Adapter<GuardTrackDet
     {
         this.context = context;
         this.arrayList = arrayList;
-        this.guardTrackDetailFragment=guardTrackDetailFragment;
+        this.guardTrackDetailFragment = guardTrackDetailFragment;
     }
 
     public void refresh(ArrayList<BeatLocationModel> arrayList)
@@ -62,21 +64,39 @@ public class GuardTrackDetailsAdapter extends RecyclerView.Adapter<GuardTrackDet
     @Override
     public void onBindViewHolder(final GuardTrackDetailsAdapter.MyViewHolder holder, int position)
     {
-        String date=arrayList.get(position).getDate();
+        String date = arrayList.get(position).getDate();
 
         holder.textViewBeatName.setText(date);
 
-        int size =arrayList.get(position).getDateLocations().size();
-        if(size > 0)
+        int size = arrayList.get(position).getDateLocations().size();
+        if (size > 0)
         {
-            String firstLatLong = arrayList.get(position).getDateLocations().get(0).getLocation();
-            String lastLatLong = arrayList.get(position).getDateLocations().get(size-1).getLocation();
-            holder.textViewBeatKm.setText(CommonMethods.getInstance().distanceBetweenLatLong(firstLatLong,lastLatLong));
+            float distanceCovered=0.0f;
+            int timeInSeconds=0;
 
-            String startTime=date+" "+arrayList.get(position).getDateLocations().get(0).getTime();
-            String endTime=date+" "+arrayList.get(position).getDateLocations().get(size-1).getTime();
+            ArrayList<ArrayList<BeatLocationModel.DateLocation>> arrayListLocations = arrayList.get(position).getDateLocations();
+            for (int i = 0; i < arrayListLocations.size(); i++)
+            {
+                ArrayList<BeatLocationModel.DateLocation> dateLocationsList = arrayListLocations.get(i);
 
-            holder.textViewTimeTaken.setText(CommonMethods.getInstance().getTimeTaken(startTime,endTime));
+                String firstLatLong = dateLocationsList.get(0).getLocation();
+                String lastLatLong = dateLocationsList.get(dateLocationsList.size() - 1).getLocation();
+
+                distanceCovered+= CommonMethods.getInstance().distanceBetweenLatLong(firstLatLong, lastLatLong);
+
+                String startTime = dateLocationsList.get(0).getTime();
+                String endTime = dateLocationsList.get(dateLocationsList.size() - 1).getTime();
+
+                timeInSeconds+= CommonMethods.getInstance().getTimeTaken(startTime, endTime);
+
+                Log.e(TAG,"timeInSeconds : "+timeInSeconds);
+
+            }
+
+            holder.textViewBeatKm.setText(CommonMethods.getInstance().getDistanceFormat(distanceCovered));
+
+
+            holder.textViewTimeTaken.setText(CommonMethods.getInstance().getTimeFormat(timeInSeconds));
         }
     }
 
@@ -106,17 +126,19 @@ public class GuardTrackDetailsAdapter extends RecyclerView.Adapter<GuardTrackDet
                 @Override
                 public void onClick(View v)
                 {
-                   // CommonDialogs.getInstance().dialog.dismiss();
-                   // ((MainActivity)context).draw(arrayList.get(getAdapterPosition()).getDateLocations());
+                    // CommonDialogs.getInstance().dialog.dismiss();
+                    // ((MainActivity)context).draw(arrayList.get(getAdapterPosition()).getDateLocations());
 
-                    Bundle bundle=new Bundle();
-                    bundle.putParcelableArrayList(MyConstant.LOCATION,arrayList.get(getAdapterPosition()).getDateLocations());
-                    bundle.putString(MyConstant.BEAT_NAME,guardTrackDetailFragment.beatName);
+                    Bundle bundle = new Bundle();
 
-                    GuardTrackMapFragment guardTrackMapFragment=new GuardTrackMapFragment();
+                    Gson gson = new Gson();
+                    bundle.putString(MyConstant.LOCATION, gson.toJson(arrayList.get(getAdapterPosition()).getDateLocations()));
+                    bundle.putString(MyConstant.BEAT_NAME, guardTrackDetailFragment.beatName);
+
+                    GuardTrackMapFragment guardTrackMapFragment = new GuardTrackMapFragment();
                     guardTrackMapFragment.setArguments(bundle);
 
-                    CommonMethods.getInstance().switchfragment(guardTrackDetailFragment,guardTrackMapFragment);
+                    CommonMethods.getInstance().switchfragment(guardTrackDetailFragment, guardTrackMapFragment);
 
                     guardTrackDetailFragment.getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
                 }
@@ -124,12 +146,6 @@ public class GuardTrackDetailsAdapter extends RecyclerView.Adapter<GuardTrackDet
 
         }
     }
-
-
-
-
-
-
 
 
 }

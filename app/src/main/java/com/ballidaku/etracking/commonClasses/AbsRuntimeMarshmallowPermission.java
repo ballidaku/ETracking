@@ -62,7 +62,10 @@ public abstract class AbsRuntimeMarshmallowPermission extends AppCompatActivity
             onPermissionGranted(requestCode);
         }
         else{
-            Snackbar.make(findViewById(android.R.id.content),mErrorString.get(requestCode), Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
+
+
+//            Snackbar.make(findViewById(android.R.id.content),mErrorString.get(requestCode), Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
+            Snackbar.make(findViewById(android.R.id.content),"Please Grant Permissions for proper functioning of app", Snackbar.LENGTH_INDEFINITE).setAction("ENABLE", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent i=new Intent();

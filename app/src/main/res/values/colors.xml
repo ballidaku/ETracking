@@ -9,7 +9,9 @@
     <color name="colorYellow">#FFFE8B03</color>
     <color name="YellowDark">#b66506</color>
     <color name="colorBlack">#000000</color>
+    <color name="colorBlackTransparent">#9a000000</color>
     <color name="colorGray">#bebdbd</color>
+    <color name="colorGrayLight">#cccbcb</color>
 
     <color name="colorGreen">#4dd247</color>
     <color name="colorGreenDark">#1fa719</color>

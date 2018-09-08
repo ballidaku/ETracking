@@ -30,7 +30,6 @@
     </string-array>
 
 
-
     <string-array name="dhametaBlock">
         <item>Dhameta</item>
         <item>Sansarpur Terrace</item>
@@ -48,15 +47,10 @@
     </string-array>
 
 
-
     <string-array name="nagrotaSurianBeat">
         <item>Nagrota Surian</item>
         <item>Jawali</item>
     </string-array>
-
-
-
-
 
 
     <string name="permission">Please enable all permission</string>

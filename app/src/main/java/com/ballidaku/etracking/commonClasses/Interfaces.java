@@ -1,8 +1,9 @@
 package com.ballidaku.etracking.commonClasses;
 
-import com.ballidaku.etracking.dataModels.BeatDataModel;
+import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
+import com.ballidaku.etracking.dataModels.OffenceDataModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,8 +32,12 @@ public class Interfaces
         public void callback(ArrayList<ImageDataModel> arrayList);
     }
 
+    public interface ReportedOffenceListener {
+        public void callback(ArrayList<OffenceDataModel> arrayList);
+    }
+
     public interface GetAllBeatListener {
-        public void callback(ArrayList<BeatDataModel> arrayList);
+        public void callback(ArrayList<GuardDataModel> arrayList);
     }
 
 
@@ -40,6 +45,15 @@ public class Interfaces
         public void callback(ArrayList<BeatLocationModel> arrayList);
     }
 
+    public interface DeleteOffenceListener {
+        public void onSuccess();
+        public void onUnSuccess();
+    }
+
+    public interface DeleteReportedImageListener {
+        public void onSuccess();
+        public void onUnSuccess();
+    }
 
     public interface DrawPathListener {
         public void drawPath(ArrayList<BeatLocationModel.DateLocation>  arrayList);

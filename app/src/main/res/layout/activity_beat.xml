@@ -127,11 +127,11 @@
 
 
             <Button
-                android:id="@+id/buttonTextReport"
+                android:id="@+id/buttonReportOffence"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="report by message"/>
+                android:text="report offence"/>
 
         </LinearLayout>
 
@@ -149,13 +149,30 @@
 
 
             <Button
-                android:id="@+id/buttonViewTextReport"
+                android:id="@+id/buttonViewReportedOffence"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="view reported messages"/>
+                android:text="view reported offence"/>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonViewSendSOS"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_60sdp"
+            android:text="Send SOS"/>
+
+        <!--<Button-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:text="Force Crash!"-->
+            <!--android:onClick="forceCrash"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_centerHorizontal="true" />-->
+
+
+
 
 
     </LinearLayout>

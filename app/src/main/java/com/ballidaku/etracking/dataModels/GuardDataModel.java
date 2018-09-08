@@ -4,13 +4,56 @@ package com.ballidaku.etracking.dataModels;
  * Created by sharanpalsingh on 21/09/17.
  */
 
-public class BeatDataModel
+public class GuardDataModel
 {
     String beatId;
     String beatEmail;
     String beatName;
     String beatPhoneNumber;
+    String beatRange;
+    String beatBlock;
+    String beatBeat;
+    String beatHeadquater;
 
+    public String getBeatRange()
+    {
+        return beatRange;
+    }
+
+    public void setBeatRange(String beatRange)
+    {
+        this.beatRange = beatRange;
+    }
+
+    public String getBeatBlock()
+    {
+        return beatBlock;
+    }
+
+    public void setBeatBlock(String beatBlock)
+    {
+        this.beatBlock = beatBlock;
+    }
+
+    public String getBeatBeat()
+    {
+        return beatBeat;
+    }
+
+    public void setBeatBeat(String beatBeat)
+    {
+        this.beatBeat = beatBeat;
+    }
+
+    public String getBeatHeadquater()
+    {
+        return beatHeadquater;
+    }
+
+    public void setBeatHeadquater(String beatHeadquater)
+    {
+        this.beatHeadquater = beatHeadquater;
+    }
 
     public String getBeatId()
     {

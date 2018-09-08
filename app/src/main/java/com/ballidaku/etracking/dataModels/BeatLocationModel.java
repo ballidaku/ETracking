@@ -1,7 +1,6 @@
 package com.ballidaku.etracking.dataModels;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 
 import java.util.ArrayList;
 
@@ -9,10 +8,35 @@ import java.util.ArrayList;
  * Created by sharanpalsingh on 22/09/17.
  */
 
-public class BeatLocationModel
+public class BeatLocationModel// implements Parcelable
 {
     String date;
-    ArrayList<DateLocation> dateLocations;
+    ArrayList<ArrayList<DateLocation>> dateLocations;
+
+    public BeatLocationModel()
+    {
+    }
+
+ /*   public BeatLocationModel(Parcel in)
+    {
+        date = in.readString();
+        dateLocations = in.createTypedArrayList(DateLocation.CREATOR);
+    }
+
+    public static final Creator<BeatLocationModel> CREATOR = new Creator<BeatLocationModel>()
+    {
+        @Override
+        public BeatLocationModel createFromParcel(Parcel in)
+        {
+            return new BeatLocationModel(in);
+        }
+
+        @Override
+        public BeatLocationModel[] newArray(int size)
+        {
+            return new BeatLocationModel[size];
+        }
+    };*/
 
     public String getDate()
     {
@@ -24,19 +48,31 @@ public class BeatLocationModel
         this.date = date;
     }
 
-    public ArrayList<DateLocation> getDateLocations()
+    public ArrayList<ArrayList<DateLocation>> getDateLocations()
     {
         return dateLocations;
     }
 
-    public void setDateLocations(ArrayList<DateLocation> dateLocations)
+    public void setDateLocations(ArrayList<ArrayList<DateLocation>> dateLocations)
     {
         this.dateLocations = dateLocations;
     }
 
+  /*  @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeString(date);
+        dest.writeTypedList(dateLocations);
+    }*/
 
 
-    public static class DateLocation implements Parcelable
+    public static class DateLocation //implements Parcelable
     {
         String location;
         String time;
@@ -51,7 +87,7 @@ public class BeatLocationModel
             time = in.readString();
         }
 
-        public static final Creator<DateLocation> CREATOR = new Creator<DateLocation>()
+       /* public static final Creator<DateLocation> CREATOR = new Creator<DateLocation>()
         {
             @Override
             public DateLocation createFromParcel(Parcel in)
@@ -65,7 +101,7 @@ public class BeatLocationModel
                 return new DateLocation[size];
             }
         };
-
+*/
         public String getLocation()
         {
             return location;
@@ -86,7 +122,7 @@ public class BeatLocationModel
             this.time = time;
         }
 
-        @Override
+        /*@Override
         public int describeContents()
         {
             return 0;
@@ -97,6 +133,6 @@ public class BeatLocationModel
         {
             dest.writeString(location);
             dest.writeString(time);
-        }
+        }*/
     }
 }

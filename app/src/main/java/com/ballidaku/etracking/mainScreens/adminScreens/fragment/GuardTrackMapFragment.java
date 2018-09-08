@@ -35,9 +35,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
 public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallback
@@ -56,7 +58,7 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
     String beatName;
 
-    ArrayList<BeatLocationModel.DateLocation> dateLocationArrayList;
+    ArrayList<ArrayList<BeatLocationModel.DateLocation>> dateLocationArrayList;
 
 /*    @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -91,7 +93,12 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
     {
 
         beatName = getArguments().getString(MyConstant.BEAT_NAME);
-        dateLocationArrayList = getArguments().getParcelableArrayList(MyConstant.LOCATION);
+        String locationData = getArguments().getString(MyConstant.LOCATION);
+       // dateLocationArrayList = getArguments().getParcelableArrayList(MyConstant.LOCATION);
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<ArrayList<BeatLocationModel.DateLocation>>>(){}.getType();
+        dateLocationArrayList = gson.fromJson(locationData, type);
+
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -150,7 +157,18 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
             }
         });*/
 
-        drawPath(dateLocationArrayList);
+        for (ArrayList<BeatLocationModel.DateLocation> dateLocations:dateLocationArrayList)
+        {
+            drawPath(dateLocations);
+        }
+
+        /*drawPath(dateLocationArrayList.get(0));
+        ArrayList<BeatLocationModel.DateLocation> a=dateLocationArrayList.get(0);
+
+        for (int i = 0; i < a.size(); i++)
+        {
+            Log.e(TAG,i+"   "+a.get(i).getLocation());
+        }*/
 
     }
 
@@ -237,10 +255,10 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
         }
     }
 
-    int[] imagesArray = {R.mipmap.marker_a, R.mipmap.marker_b, R.mipmap.marker_c, R.mipmap.marker_d, R.mipmap.marker_e, R.mipmap.marker_f, R.mipmap.marker_g,
-            R.mipmap.marker_h, R.mipmap.marker_i, R.mipmap.marker_j, R.mipmap.marker_k, R.mipmap.marker_l, R.mipmap.marker_m, R.mipmap.marker_n};
+//    int[] imagesArray = {R.mipmap.marker_a, R.mipmap.marker_b, R.mipmap.marker_c, R.mipmap.marker_d, R.mipmap.marker_e, R.mipmap.marker_f, R.mipmap.marker_g,
+//            R.mipmap.marker_h, R.mipmap.marker_i, R.mipmap.marker_j, R.mipmap.marker_k, R.mipmap.marker_l, R.mipmap.marker_m, R.mipmap.marker_n};
 
-    public void refreshMap(ArrayList<HashMap<String, Object>> result)
+  /*  public void refreshMap(ArrayList<HashMap<String, Object>> result)
     {
 
         for (int i = 0; i < result.size(); i++)
@@ -264,19 +282,19 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
         try
         {
-          /*  if (mMap == null)
+          *//*  if (mMap == null)
             {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
                 {
                     mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
                 }
             }
-            mMap.setMapType(mMap.MAP_TYPE_NORMAL);*/
+            mMap.setMapType(mMap.MAP_TYPE_NORMAL);*//*
             //mMap.setMyLocationEnabled(true);
-            /*mMap.setTrafficEnabled(false);
+            *//*mMap.setTrafficEnabled(false);
             mMap.setIndoorEnabled(false);
             mMap.setBuildingsEnabled(true);
-            mMap.getUiSettings().setZoomControlsEnabled(true);*/
+            mMap.getUiSettings().setZoomControlsEnabled(true);*//*
 //            mMap.moveCamera(CameraUpdateFactory.newLatLng(SomePos));
 //            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
 //                      .target(mMap.getCameraPosition().target)
@@ -291,7 +309,7 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 //                      .title("Hello world"));
 
 
-           /* mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+           *//* mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
             {
                 @Override
                 public boolean onMarkerClick(Marker arg0)
@@ -367,14 +385,14 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
                 }
 
-            });*/
+            });*//*
 
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void setZoom(LatLng currentLatLng, int zoom)
     {
@@ -453,7 +471,7 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
         Log.e(TAG,"Start Lat "+latLong[0] +" Long "+latLong[1]);
 
-        setZoom(new LatLng(Double.parseDouble(latLong[0]), Double.parseDouble(latLong[1])), 12);
+        setZoom(new LatLng(Double.parseDouble(latLong[0]), Double.parseDouble(latLong[1])), 16);
 
 
         marker = mMap.addMarker(new MarkerOptions()

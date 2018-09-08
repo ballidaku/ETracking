@@ -1,66 +1,27 @@
 {
   "project_info": {
-    "project_number": "88695867335",
-    "firebase_url": "https://ballichatdemo.firebaseio.com",
-    "project_id": "ballichatdemo",
-    "storage_bucket": "ballichatdemo.appspot.com"
+    "project_number": "449123565200",
+    "firebase_url": "https://etracking-2fa57.firebaseio.com",
+    "project_id": "etracking-2fa57",
+    "storage_bucket": "etracking-2fa57.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:88695867335:android:0eb48c4ae8ab0d2b",
-        "android_client_info": {
-          "package_name": "com.sharan.ballichatdemo"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "88695867335-3cv7dg41nfjf5l889bmuujib0pvonlf0.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "88695867335-2u2782ofko4eq4thkgkqlkdam1ra4in0.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyC-Q3D3zudid5cQc9iNQOx7p4xmdX-NOJI"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:88695867335:android:ce0e0f6d21c521dc",
+        "mobilesdk_app_id": "1:449123565200:android:ce0e0f6d21c521dc",
         "android_client_info": {
           "package_name": "com.ballidaku.etracking"
         }
       },
       "oauth_client": [
         {
-          "client_id": "88695867335-3cv7dg41nfjf5l889bmuujib0pvonlf0.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "88695867335-2u2782ofko4eq4thkgkqlkdam1ra4in0.apps.googleusercontent.com",
+          "client_id": "449123565200-fumqpflq9er4j8u3utsl9cf3j22ag7id.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC-Q3D3zudid5cQc9iNQOx7p4xmdX-NOJI"
+          "current_key": "AIzaSyC93k4gY_X0g5pFIb1yUYZPlsF_mXRDWJw"
         }
       ],
       "services": {

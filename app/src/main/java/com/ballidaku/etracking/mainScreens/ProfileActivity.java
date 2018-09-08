@@ -60,6 +60,7 @@ public class ProfileActivity extends AppCompatActivity
         linearLayoutBeat=(LinearLayout)findViewById(R.id.linearLayoutBeat);
 
         ((TextView) findViewById(R.id.textViewTitle)).setText("Profile");
+        ((TextView) findViewById(R.id.textViewVersion)).setVisibility(View.VISIBLE);
 
         textViewRange = (TextView) findViewById(R.id.textViewRange);
         textViewBlock = (TextView) findViewById(R.id.textViewBlock);
