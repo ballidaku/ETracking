@@ -10,6 +10,7 @@ public class MyConstant
     public static final String SPACE=" : ";
 
 
+    public static final String USER_PHOTO="user_photo";
     public static final String USER_NAME="user_name";
     public static final String USER_EMAIL="user_email";
     public static final String USER_PHONE="user_phone";

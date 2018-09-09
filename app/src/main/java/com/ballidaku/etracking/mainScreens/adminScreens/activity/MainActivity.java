@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ballidaku.etracking.R;
@@ -30,13 +31,17 @@ import com.ballidaku.etracking.mainScreens.adminScreens.fragment.ReportedOffence
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.SearchGuardByCategoryFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.SearchGuardByNameFragment;
 
-public class MainActivity extends AbsRuntimeMarshmallowPermission implements NavigationView.OnNavigationItemSelectedListener
+public class MainActivity extends AbsRuntimeMarshmallowPermission implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener
 {
     String TAG = "MainActivity";
     Context context;
 
     NavigationView navigationView;
     public Toolbar toolbar;
+
+    ImageView imageViewProfilePic;
+
+    DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -91,6 +96,12 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         View headerLayout = navigationView.getHeaderView(0);
         ((TextView) headerLayout.findViewById(R.id.textViewName)).setText(MySharedPreference.getInstance().getUserName(context));
         ((TextView) headerLayout.findViewById(R.id.textViewEmail)).setText(MySharedPreference.getInstance().getUserEmail(context));
+
+        imageViewProfilePic=headerLayout.findViewById(R.id.imageViewProfilePic);
+
+        headerLayout.findViewById(R.id.linearLayoutMainHeader).setOnClickListener(this);
+
+        drawer = findViewById(R.id.drawer_layout);
     }
 
     @Override
@@ -147,6 +158,7 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         switch (item.getItemId())
         {
             case R.id.profile:
+
 
                 startActivity(new Intent(context, ProfileActivity.class));
 
@@ -223,7 +235,7 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
 
         if (whichOne == 0 )
         {
-            getMenuInflater().inflate(R.menu.admin_menu, menu);
+          //  getMenuInflater().inflate(R.menu.admin_menu, menu);
         }
         else if (whichOne == 1)
         {
@@ -296,12 +308,34 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         {
             CommonMethods.getInstance().switchfragment(context, currentFragment = new ReportedOffenceFragment());
         }
+        else if (id == R.id.nav_sign_out)
+        {
+            MySharedPreference.getInstance().clearUserID(context);
+            Intent intent = new Intent(context, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+            finish();
+        }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         drawer.closeDrawer(GravityCompat.START);
 
         return true;
     }
 
 
+    @Override
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+            case R.id.linearLayoutMainHeader:
+
+                drawer.closeDrawer(GravityCompat.START);
+                startActivity(new Intent(context, ProfileActivity.class));
+
+                break;
+        }
+    }
 }

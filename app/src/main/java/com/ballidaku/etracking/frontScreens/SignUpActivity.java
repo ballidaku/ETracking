@@ -1,9 +1,17 @@
 package com.ballidaku.etracking.frontScreens;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -12,11 +20,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ballidaku.etracking.R;
+import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.Interfaces;
@@ -26,14 +37,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.HashMap;
 
 
-public class SignUpActivity extends AppCompatActivity  implements View.OnClickListener
+public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements View.OnClickListener
 {
 
-    String TAG=LoginActivity.class.getSimpleName();
+    String TAG = LoginActivity.class.getSimpleName();
 
     View view;
 
@@ -55,10 +67,20 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
     Spinner spinnerBlock;
     Spinner spinnerBeat;
 
+    ImageView imageViewProfile;
+
     LinearLayout linearLayoutBeat;
 
 
     FirebaseAuth mAuth;
+
+    private static final int CAMERA_REQUEST = 13;
+    private static final int PICK_IMAGE_GALLERY = 14;
+
+    boolean isImageClicked;
+
+    //Bitmap photo;
+    String imagePath="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -79,11 +101,11 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
             public void callback(boolean isAdminThere)
             {
 
-                Log.e(TAG,"YES HAS ADMIN  "+ isAdminThere );
+                Log.e(TAG, "YES HAS ADMIN  " + isAdminThere);
 
 
                 String[] yourArray;
-                if(isAdminThere)
+                if (isAdminThere)
                 {
                     yourArray = new String[]{"Sub Admin", "Beat"};
                 }
@@ -93,14 +115,13 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
                 }
 
 
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context,R.layout.spinner_item_view, yourArray);
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(context, R.layout.spinner_item_view, yourArray);
 
 
                 spinnerUserType.setAdapter(dataAdapter);
             }
         });
     }
-
 
 
     private void setUpIds()
@@ -127,6 +148,7 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
         spinnerBlock = (Spinner) findViewById(R.id.spinnerBlock);
         spinnerBeat = (Spinner) findViewById(R.id.spinnerBeat);
 
+        imageViewProfile = findViewById(R.id.imageViewProfile);
 
         linearLayoutBeat = (LinearLayout) findViewById(R.id.linearLayoutBeat);
         linearLayoutBeat.setVisibility(View.GONE);
@@ -135,12 +157,14 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
         findViewById(R.id.textViewContinue).setOnClickListener(this);
         findViewById(R.id.textViewSignUp).setOnClickListener(this);
 
-       // spinnerUserType.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerUserType));
+        imageViewProfile.setOnClickListener(this);
+
+        // spinnerUserType.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerUserType));
         //spinnerRange.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerRange));
         //spinnerBlock.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerBlock));
 
 
-        ArrayAdapter<String> rangeAdapter = new ArrayAdapter<String>(context,R.layout.spinner_item_view, getResources().getStringArray(R.array.rangeName));
+        ArrayAdapter<String> rangeAdapter = new ArrayAdapter<String>(context, R.layout.spinner_item_view, getResources().getStringArray(R.array.rangeName));
         spinnerRange.setAdapter(rangeAdapter);
 
         spinnerUserType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -148,13 +172,13 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                view.setPadding(0, 0, 0,0);
-                TextView textViewSpinner=(TextView)view.findViewById(R.id.textViewSpinner);
+                view.setPadding(0, 0, 0, 0);
+                TextView textViewSpinner = (TextView) view.findViewById(R.id.textViewSpinner);
                 textViewSpinner.setGravity(Gravity.RIGHT);
 
-                String userType=spinnerUserType.getSelectedItem().toString().toLowerCase();
+                String userType = spinnerUserType.getSelectedItem().toString().toLowerCase();
 
-                if(userType.equals(MyConstant.BEAT))
+                if (userType.equals(MyConstant.BEAT))
                 {
                     linearLayoutBeat.setVisibility(View.VISIBLE);
                 }
@@ -177,23 +201,23 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                view.setPadding(0, 0, 0,0);
-                TextView textViewSpinner=(TextView)view.findViewById(R.id.textViewSpinner);
+                view.setPadding(0, 0, 0, 0);
+                TextView textViewSpinner = (TextView) view.findViewById(R.id.textViewSpinner);
                 textViewSpinner.setGravity(Gravity.RIGHT);
 
-                String rangeName=spinnerRange.getSelectedItem().toString();
+                String rangeName = spinnerRange.getSelectedItem().toString();
 
                 String[] range;
-                if(rangeName.equals(MyConstant.NAGROTA_SURIAN))
+                if (rangeName.equals(MyConstant.NAGROTA_SURIAN))
                 {
-                    range=getResources().getStringArray(R.array.nagrotaBlock);
+                    range = getResources().getStringArray(R.array.nagrotaBlock);
                 }
                 else
                 {
-                    range=getResources().getStringArray(R.array.dhametaBlock);
+                    range = getResources().getStringArray(R.array.dhametaBlock);
                 }
 
-                ArrayAdapter<String> blockAdapter = new ArrayAdapter<String>(context,R.layout.spinner_item_view, range);
+                ArrayAdapter<String> blockAdapter = new ArrayAdapter<String>(context, R.layout.spinner_item_view, range);
                 spinnerBlock.setAdapter(blockAdapter);
             }
 
@@ -210,31 +234,31 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                view.setPadding(0, 0, 0,0);
-                TextView textViewSpinner=(TextView)view.findViewById(R.id.textViewSpinner);
+                view.setPadding(0, 0, 0, 0);
+                TextView textViewSpinner = (TextView) view.findViewById(R.id.textViewSpinner);
                 textViewSpinner.setGravity(Gravity.RIGHT);
 
-                String blockName=spinnerBlock.getSelectedItem().toString();
+                String blockName = spinnerBlock.getSelectedItem().toString();
 
-                String[] beat ;
-                if(blockName.equals(MyConstant.DEHRA))
+                String[] beat;
+                if (blockName.equals(MyConstant.DEHRA))
                 {
-                    beat=getResources().getStringArray(R.array.nagrotaDehraBeat);
+                    beat = getResources().getStringArray(R.array.nagrotaDehraBeat);
                 }
-                else if(blockName.equals(MyConstant.NAGROTA_SURIAN))
+                else if (blockName.equals(MyConstant.NAGROTA_SURIAN))
                 {
-                    beat=getResources().getStringArray(R.array.nagrotaNagrotaBeat);
+                    beat = getResources().getStringArray(R.array.nagrotaNagrotaBeat);
                 }
-                else if(blockName.equals(MyConstant.DHAMETA))
+                else if (blockName.equals(MyConstant.DHAMETA))
                 {
-                    beat=getResources().getStringArray(R.array.dhametaDhametaBeat);
+                    beat = getResources().getStringArray(R.array.dhametaDhametaBeat);
                 }
                 else
                 {
-                    beat=getResources().getStringArray(R.array.dhametaSansarpurBeat);
+                    beat = getResources().getStringArray(R.array.dhametaSansarpurBeat);
                 }
 
-                ArrayAdapter<String> beatAdapter = new ArrayAdapter<String>(context,R.layout.spinner_item_view, beat);
+                ArrayAdapter<String> beatAdapter = new ArrayAdapter<String>(context, R.layout.spinner_item_view, beat);
                 spinnerBeat.setAdapter(beatAdapter);
             }
 
@@ -246,50 +270,49 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
         });
 
 
-
         spinnerBeat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                view.setPadding(0, 0, 0,0);
-                TextView textViewSpinner=(TextView)view.findViewById(R.id.textViewSpinner);
+                view.setPadding(0, 0, 0, 0);
+                TextView textViewSpinner = (TextView) view.findViewById(R.id.textViewSpinner);
                 textViewSpinner.setGravity(Gravity.RIGHT);
 
-                String beatName=spinnerBeat.getSelectedItem().toString();
+                String beatName = spinnerBeat.getSelectedItem().toString();
 
-                String headquater="";
-                if(beatName.equals(MyConstant.DEHRA))
+                String headquater = "";
+                if (beatName.equals(MyConstant.DEHRA))
                 {
-                    headquater=MyConstant.DEHRA;
+                    headquater = MyConstant.DEHRA;
                 }
-                else if(beatName.equals(MyConstant.BHATOLI_PHAKORIAN))
+                else if (beatName.equals(MyConstant.BHATOLI_PHAKORIAN))
                 {
-                    headquater=MyConstant.BHATOLI;
+                    headquater = MyConstant.BHATOLI;
                 }
-                else if(beatName.equals(MyConstant.NAGROTA_SURIAN))
+                else if (beatName.equals(MyConstant.NAGROTA_SURIAN))
                 {
-                    headquater=MyConstant.NAGROTA_SURIAN;
+                    headquater = MyConstant.NAGROTA_SURIAN;
                 }
-                else if(beatName.equals(MyConstant.JAWALI))
+                else if (beatName.equals(MyConstant.JAWALI))
                 {
-                    headquater=MyConstant.LUV;
+                    headquater = MyConstant.LUV;
                 }
-                else if(beatName.equals(MyConstant.DHAMETA))
+                else if (beatName.equals(MyConstant.DHAMETA))
                 {
-                    headquater=MyConstant.DHAMETA;
+                    headquater = MyConstant.DHAMETA;
                 }
-                else if(beatName.equals(MyConstant.PONG_DAM))
+                else if (beatName.equals(MyConstant.PONG_DAM))
                 {
-                    headquater=MyConstant.KHATIYAR;
+                    headquater = MyConstant.KHATIYAR;
                 }
-                else if(beatName.equals(MyConstant.SANSARPUR_TERRACE))
+                else if (beatName.equals(MyConstant.SANSARPUR_TERRACE))
                 {
-                    headquater=MyConstant.SANSARPUR_TERRACE;
+                    headquater = MyConstant.SANSARPUR_TERRACE;
                 }
-                else if(beatName.equals(MyConstant.DADASIBA))
+                else if (beatName.equals(MyConstant.DADASIBA))
                 {
-                    headquater=MyConstant.DADASIBA;
+                    headquater = MyConstant.DADASIBA;
                 }
 
 
@@ -305,23 +328,28 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
     }
 
 
-
-
-
     @Override
     public void onClick(View view)
     {
         switch (view.getId())
         {
-              case R.id.textViewContinue:
+            case R.id.textViewContinue:
 
-                  checkValidation();
+                checkValidation();
 
-                 break;
+                break;
 
             case R.id.textViewSignUp:
 
                 finish();
+
+                break;
+
+
+            case R.id.imageViewProfile:
+
+                String[] permission = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                requestAppPermissions(permission, R.string.permission, 54);
 
                 break;
 
@@ -331,53 +359,52 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
 
     public void checkValidation()
     {
-        final String name=editTextName.getText().toString().trim();
-        final String email=editTextEmail.getText().toString().trim();
-        String password=editTextPassword.getText().toString().trim();
-        String confirmPassword=editTextConfirmPassword.getText().toString().trim();
-        final String phoneNumber=editTextPhone.getText().toString().trim();
+        final String name = editTextName.getText().toString().trim();
+        final String email = editTextEmail.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+        String confirmPassword = editTextConfirmPassword.getText().toString().trim();
+        final String phoneNumber = editTextPhone.getText().toString().trim();
 
 
-
-        if(name.isEmpty())
+        if (name.isEmpty())
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter name.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter name.");
         }
-        else if(email.isEmpty())
+        else if (email.isEmpty())
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter email.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter email.");
         }
-        else if(!CommonMethods.getInstance().isValidEmail(email))
+        else if (!CommonMethods.getInstance().isValidEmail(email))
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter valid email.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter valid email.");
         }
         else if (phoneNumber.isEmpty())
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter phone number.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter phone number.");
         }
         else if (!CommonMethods.getInstance().isValidMobile(phoneNumber))
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter phone number of 10 digits.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter phone number of 10 digits.");
         }
         else if (password.isEmpty())
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter password.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter password.");
         }
         else if (password.length() < 6)
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Password must be of 6 digits.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Password must be of 6 digits.");
         }
         else if (confirmPassword.isEmpty())
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Please enter confirm password.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Please enter confirm password.");
         }
         else if (confirmPassword.length() < 6)
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Confirm password must be of 6 digits.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Confirm password must be of 6 digits.");
         }
         else if (!password.equals(confirmPassword))
         {
-            CommonMethods.getInstance().show_snackbar(view,context,"Password & confirm password didn't match.");
+            CommonMethods.getInstance().show_snackbar(view, context, "Password & confirm password didn't match.");
         }
         else
         {
@@ -394,32 +421,33 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
                             {
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.e(TAG, "createUserWithEmail:success");
-                               // FirebaseUser user = mAuth.getCurrentUser();
+                                // FirebaseUser user = mAuth.getCurrentUser();
 
-                                HashMap<String,Object> hashMap=new HashMap<String, Object>();
-                                hashMap.put(MyConstant.USER_NAME,name);
-                                hashMap.put(MyConstant.USER_EMAIL,email);
-                                hashMap.put(MyConstant.USER_PHONE,phoneNumber);
-                                hashMap.put(MyConstant.USER_ALLOWED,"false");
+                                HashMap<String, Object> hashMap = new HashMap<String, Object>();
+                                hashMap.put(MyConstant.USER_PHOTO, imagePath);
+                                hashMap.put(MyConstant.USER_NAME, name);
+                                hashMap.put(MyConstant.USER_EMAIL, email);
+                                hashMap.put(MyConstant.USER_PHONE, phoneNumber);
+                                hashMap.put(MyConstant.USER_ALLOWED, "false");
 
-                                String userType=(String)spinnerUserType.getSelectedItem();
-                                if(userType.equals("Admin"))
+                                String userType = (String) spinnerUserType.getSelectedItem();
+                                if (userType.equals("Admin"))
                                 {
-                                    MyFirebase.getInstance().createUser(context,MyConstant.ADMIN, hashMap);
+                                    MyFirebase.getInstance().createUser(context, MyConstant.ADMIN, hashMap);
                                 }
-                                else if(userType.equals("Sub Admin"))
+                                else if (userType.equals("Sub Admin"))
                                 {
-                                    MyFirebase.getInstance().createUser(context,MyConstant.SUB_ADMIN, hashMap);
+                                    MyFirebase.getInstance().createUser(context, MyConstant.SUB_ADMIN, hashMap);
                                 }
-                                else if(userType.equals("Beat"))
+                                else if (userType.equals("Beat"))
                                 {
-                                    hashMap.put(MyConstant.RANGE,spinnerRange.getSelectedItem());
-                                    hashMap.put(MyConstant.BLOCK,spinnerBlock.getSelectedItem());
-                                    hashMap.put(MyConstant.BEAT,spinnerBeat.getSelectedItem());
-                                    hashMap.put(MyConstant.HEADQUATER,textViewHeadquater.getText().toString());
+                                    hashMap.put(MyConstant.RANGE, spinnerRange.getSelectedItem());
+                                    hashMap.put(MyConstant.BLOCK, spinnerBlock.getSelectedItem());
+                                    hashMap.put(MyConstant.BEAT, spinnerBeat.getSelectedItem());
+                                    hashMap.put(MyConstant.HEADQUATER, textViewHeadquater.getText().toString());
 
 
-                                    MyFirebase.getInstance().createUser(context,MyConstant.BEAT, hashMap);
+                                    MyFirebase.getInstance().createUser(context, MyConstant.BEAT, hashMap);
                                 }
                             }
                             else
@@ -427,9 +455,9 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
                                 CommonDialogs.getInstance().dialog.dismiss();
 
                                 // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure  " , task.getException());
+                                Log.w(TAG, "createUserWithEmail:failure  ", task.getException());
 
-                                CommonMethods.getInstance().show_snackbar(view,context,task.getException().getMessage());
+                                CommonMethods.getInstance().show_snackbar(view, context, task.getException().getMessage());
                             }
 
 
@@ -454,6 +482,145 @@ public class SignUpActivity extends AppCompatActivity  implements View.OnClickLi
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+
+    @Override
+    public void onPermissionGranted(int requestCode)
+    {
+        Log.e(TAG, "onPermissionGranted " + requestCode);
+        if (requestCode == 54)
+        {
+            selectImage();
+        }
+    }
+
+
+    private void selectImage()
+    {
+        try
+        {
+            PackageManager pm = getPackageManager();
+            int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, getPackageName());
+            if (hasPerm == PackageManager.PERMISSION_GRANTED)
+            {
+                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+                builder.setTitle("Select Option");
+                builder.setItems(options, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item)
+                    {
+                        if (options[item].equals("Take Photo"))
+                        {
+                            dialog.dismiss();
+                            capture();
+                        }
+                        else if (options[item].equals("Choose From Gallery"))
+                        {
+                            dialog.dismiss();
+                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
+                        }
+                        else if (options[item].equals("Cancel"))
+                        {
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                builder.show();
+            }
+            else
+                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+
+    void capture()
+    {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageFile());
+
+        Uri apkURI = FileProvider.getUriForFile(
+                context,
+                context.getApplicationContext()
+                        .getPackageName() + ".provider", CommonMethods.getInstance().getTempraryImageFile2());
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
+
+        startActivityForResult(intent, CAMERA_REQUEST);
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        switch (requestCode)
+        {
+            case CAMERA_REQUEST:
+
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    isImageClicked = true;
+
+
+//                    imagePath = CompressionClass.getInstance().compressImage(context, CommonMethods.getInstance().getTempraryImageFile());
+                    imagePath = CommonMethods.getInstance().getTempraryImageFile().toString();
+
+                    // start cropping activity for pre-acquired image saved on the device
+                    CropImage.activity(Uri.parse("file://" + imagePath))
+                            .setAspectRatio(1, 1)
+                            .start(this);
+                }
+                break;
+
+
+            case PICK_IMAGE_GALLERY:
+
+                Uri selectedImage = data.getData();
+
+                imagePath = getRealPathFromURI(selectedImage);
+
+
+                CropImage.activity(Uri.parse("file://" + imagePath))
+                        .setAspectRatio(1, 1)
+                        .start(this);
+
+                break;
+
+
+            case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK)
+                {
+                    Uri resultUri = result.getUri();
+
+                    imageViewProfile.setImageURI(resultUri);
+                }
+                else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
+                {
+                    Exception error = result.getError();
+                }
+
+                break;
+
+        }
+    }
+
+
+    public String getRealPathFromURI(Uri contentUri)
+    {
+        String[] proj = {MediaStore.Audio.Media.DATA};
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
 }

@@ -44,7 +44,7 @@ public class ReportOffenceActivity extends AbsRuntimeMarshmallowPermission imple
     boolean isImageClicked;
 
     //Bitmap photo;
-    String imagePath;
+    String imagePath="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

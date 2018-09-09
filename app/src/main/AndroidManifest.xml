@@ -73,6 +73,11 @@
         <activity android:name=".mainScreens.beatScreens.ViewReportedOffenceActivity"
                   android:label=""
                   android:screenOrientation="portrait"/>
+
+
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+                  android:theme="@style/Base.Theme.AppCompat"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="c1ebda239809615578cf710b8654d41759688dfb" />

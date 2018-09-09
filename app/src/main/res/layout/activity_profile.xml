@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,13 +24,16 @@
             android:orientation="vertical">
 
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+            <com.ballidaku.etracking.commonClasses.CircleImageView
+                android:id="@+id/imageViewProfile"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="@dimen/_30sdp"
                 android:layout_marginTop="@dimen/_30sdp"
-                android:src="@mipmap/ic_tick_logo"/>
+                android:src="@mipmap/ic_user_placeholder"
+                app:civ_border_color="#FFFFFF"
+                app:civ_border_width="2dp"/>
 
 
             <LinearLayout
@@ -399,95 +403,95 @@
                 android:layout_marginTop="@dimen/_10sdp"
                 android:src="@mipmap/ic_divider"/>
 
-<!--            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
+            <!--            <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
 
-                <ImageView
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:layout_marginLeft="@dimen/_10sdp"
-                    android:layout_marginRight="@dimen/_10sdp"
-                    android:src="@mipmap/ic_username"/>
+                            <ImageView
+                                android:layout_width="@dimen/_25sdp"
+                                android:layout_height="@dimen/_25sdp"
+                                android:layout_marginLeft="@dimen/_10sdp"
+                                android:layout_marginRight="@dimen/_10sdp"
+                                android:src="@mipmap/ic_username"/>
 
 
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="0.6"
-                        android:paddingLeft="@dimen/_5sdp"
-                        android:text="SELECT RANGE"
-                        android:textColor="@color/colorWhiteDim"
-                        android:textSize="@dimen/_11sdp"/>
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="0.6"
+                                    android:paddingLeft="@dimen/_5sdp"
+                                    android:text="SELECT RANGE"
+                                    android:textColor="@color/colorWhiteDim"
+                                    android:textSize="@dimen/_11sdp"/>
 
-                    <Spinner
-                        android:id="@+id/spinnerRange"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/colorWhite"
-                        android:entries="@array/rangeName"
-                        android:popupBackground="@color/colorPrimary"/>
-
-
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:src="@mipmap/ic_divider"/>
+                                <Spinner
+                                    android:id="@+id/spinnerRange"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:backgroundTint="@color/colorWhite"
+                                    android:entries="@array/rangeName"
+                                    android:popupBackground="@color/colorPrimary"/>
 
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal">
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/_10sdp"
+                            android:layout_marginTop="@dimen/_10sdp"
+                            android:src="@mipmap/ic_divider"/>
 
 
-                <ImageView
-                    android:layout_width="@dimen/_25sdp"
-                    android:layout_height="@dimen/_25sdp"
-                    android:layout_marginLeft="@dimen/_10sdp"
-                    android:layout_marginRight="@dimen/_10sdp"
-                    android:src="@mipmap/ic_username"/>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="horizontal">
 
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_weight="0.6"
-                    android:paddingLeft="@dimen/_5sdp"
-                    android:text="SELECT BLOCK"
-                    android:textColor="@color/colorWhiteDim"
-                    android:textSize="@dimen/_11sdp"/>
-
-                <Spinner
-                    android:id="@+id/spinnerBlock"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/colorWhite"
-                    android:entries="@array/nagrotaRange"
-                    android:popupBackground="@color/colorPrimary"/>
+                            <ImageView
+                                android:layout_width="@dimen/_25sdp"
+                                android:layout_height="@dimen/_25sdp"
+                                android:layout_marginLeft="@dimen/_10sdp"
+                                android:layout_marginRight="@dimen/_10sdp"
+                                android:src="@mipmap/ic_username"/>
 
 
-            </LinearLayout>
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_weight="0.6"
+                                android:paddingLeft="@dimen/_5sdp"
+                                android:text="SELECT BLOCK"
+                                android:textColor="@color/colorWhiteDim"
+                                android:textSize="@dimen/_11sdp"/>
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/_10sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:src="@mipmap/ic_divider"/>-->
+                            <Spinner
+                                android:id="@+id/spinnerBlock"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:backgroundTint="@color/colorWhite"
+                                android:entries="@array/nagrotaRange"
+                                android:popupBackground="@color/colorPrimary"/>
+
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/_10sdp"
+                            android:layout_marginTop="@dimen/_10sdp"
+                            android:src="@mipmap/ic_divider"/>-->
 
             <!-- <TextView
                  android:id="@+id/textViewContinue"
