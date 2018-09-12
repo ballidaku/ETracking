@@ -17,6 +17,7 @@ public class MyConstant
     public static final String USER_ALLOWED="user_allowed";
 
 
+    public static final String USER_IMAGE="user_image";
     public static final String USER_TYPE="user_type";
     public static final String USER_ID="user_id";
     public static final String FCM_TOKEN="fcm_token";

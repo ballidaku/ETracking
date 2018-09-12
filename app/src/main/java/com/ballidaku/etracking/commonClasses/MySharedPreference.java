@@ -62,6 +62,7 @@ public class MySharedPreference
         editor.putString(MyConstant.USER_NAME, (String) hashMap.get(MyConstant.USER_NAME));
         editor.putString(MyConstant.USER_EMAIL, (String) hashMap.get(MyConstant.USER_EMAIL));
         editor.putString(MyConstant.USER_PHONE, (String) hashMap.get(MyConstant.USER_PHONE));
+        editor.putString(MyConstant.USER_PHOTO, (String) hashMap.get(MyConstant.USER_PHOTO));
 
         if(userType.equals(MyConstant.BEAT))
         {
@@ -103,6 +104,11 @@ public class MySharedPreference
     public String getUserPhone(Context context)
     {
         return getPreference(context).getString(MyConstant.USER_PHONE,"");
+    }
+
+    public String getUserPhoto(Context context)
+    {
+        return getPreference(context).getString(MyConstant.USER_PHOTO,"");
     }
 
     public String getRange(Context context)

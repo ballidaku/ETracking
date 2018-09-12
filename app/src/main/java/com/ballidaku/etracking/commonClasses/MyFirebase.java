@@ -13,6 +13,7 @@ import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
+import com.ballidaku.etracking.frontScreens.SignUpActivity;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.BeatActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.ReportOffenceActivity;
@@ -37,14 +38,14 @@ import java.util.HashMap;
 /**
  * Created by sharanpalsingh on 05/03/17.
  */
-public class MyFirebase
+public class MyFirebase<T>
 {
 
-    String TAG = MyFirebase.class.getSimpleName();
+    private String TAG = MyFirebase.class.getSimpleName();
 
-    public static MyFirebase instance = new MyFirebase();
+    private static MyFirebase instance = new MyFirebase();
 
-    DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
+    private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
 
 
     public static MyFirebase getInstance()
@@ -53,12 +54,12 @@ public class MyFirebase
     }
 
 
-    void showDialog(Context context)
+    private void showDialog(Context context)
     {
         CommonDialogs.getInstance().progressDialog(context);
     }
 
-    void dismissDialog()
+    private void dismissDialog()
     {
         if (CommonDialogs.getInstance().dialog.isShowing())
         {
@@ -262,7 +263,7 @@ public class MyFirebase
     //**********************************************************************************************
     //**********************************************************************************************
 
-    public void saveImage(final Context context/* Bitmap bitmap,*/, String imagePath, final String imageOffence, final HashMap<String, Object> hashMap)
+    public void saveImage(final Context context, String imagePath, final String imageOffence, final T data)
     {
 
         showDialog(context);
@@ -273,14 +274,17 @@ public class MyFirebase
         StorageReference storageRef = storage.getReference();
 
         // Points to "images"
-        StorageReference mountainImagesRef = storageRef.child("images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
+        StorageReference mountainImagesRef;
+        if (imageOffence.equals(MyConstant.USER_IMAGE))
+        {
+            mountainImagesRef = storageRef.child("profile_images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
+        }
+        else
+        {
+            mountainImagesRef = storageRef.child("images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
+        }
 
 
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//        byte[] data = baos.toByteArray();
-
-//        UploadTask uploadTask = mountainImagesRef.putBytes(data);
         UploadTask uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + imagePath));
         uploadTask.addOnFailureListener(new OnFailureListener()
         {
@@ -313,7 +317,11 @@ public class MyFirebase
                 }
                 else if (imageOffence.equals(MyConstant.OFFENCE))
                 {
-                    reportOffence(context, downloadUrl, hashMap);
+                    reportOffence(context, downloadUrl, (HashMap<String, Object>) data);
+                }
+                else if (imageOffence.equals(MyConstant.USER_IMAGE))
+                {
+                    ((SignUpActivity.onImageUpload) data).imagePathAfterUpload(downloadUrl);
                 }
             }
         });

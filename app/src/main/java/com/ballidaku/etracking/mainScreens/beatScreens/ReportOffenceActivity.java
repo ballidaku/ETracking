@@ -141,7 +141,7 @@ public class ReportOffenceActivity extends AbsRuntimeMarshmallowPermission imple
             hashMap.put(MyConstant.DESCRIPTION, description);
 
 
-            MyFirebase.getInstance().saveImage(context, /*photo,*/imagePath, MyConstant.OFFENCE,hashMap);
+            MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.OFFENCE,hashMap);
         }
     }
 

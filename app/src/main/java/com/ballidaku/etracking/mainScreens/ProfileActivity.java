@@ -104,6 +104,8 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
 
         imageViewProfile.setOnClickListener(this);
 
+
+
         setValues();
     }
 
@@ -115,6 +117,8 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         editTextName.setText(MySharedPreference.getInstance().getUserName(context));
         editTextEmail.setText(MySharedPreference.getInstance().getUserEmail(context));
         editTextPhone.setText(MySharedPreference.getInstance().getUserPhone(context));
+
+        CommonMethods.getInstance().showImageGlide(context,imageViewProfile,MySharedPreference.getInstance().getUserPhoto(context));
 
 
         nameKeyListener = editTextName.getKeyListener();

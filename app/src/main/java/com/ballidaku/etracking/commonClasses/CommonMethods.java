@@ -138,7 +138,7 @@ public class CommonMethods
     {
         Glide.with(context)
              .load(path)
-             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher))
+             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_user_placeholder).error(R.mipmap.ic_user_placeholder))
              .into(imageView);
     }
 

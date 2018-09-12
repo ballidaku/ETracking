@@ -616,7 +616,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
 
                     String imagePath = CompressionClass.getInstance().compressImage(context, CommonMethods.getInstance().getTempraryImageFile());
 
-                    MyFirebase.getInstance().saveImage(context, /*photo,*/imagePath, MyConstant.IMAGE, null);
+                    MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.IMAGE, null);
                     /*}
                     catch (FileNotFoundException e)
                     {

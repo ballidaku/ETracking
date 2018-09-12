@@ -361,7 +361,7 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
     {
         final String name = editTextName.getText().toString().trim();
         final String email = editTextEmail.getText().toString().trim();
-        String password = editTextPassword.getText().toString().trim();
+        final String password = editTextPassword.getText().toString().trim();
         String confirmPassword = editTextConfirmPassword.getText().toString().trim();
         final String phoneNumber = editTextPhone.getText().toString().trim();
 
@@ -409,63 +409,93 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
         else
         {
             CommonMethods.getInstance().hideKeypad(this);
-            CommonDialogs.getInstance().progressDialog(context);
 
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
+
+
+
+
+            if(!imagePath.isEmpty())
+            {
+                MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new onImageUpload()
+                {
+                    @Override
+                    public void imagePathAfterUpload(String path)
                     {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task)
-                        {
-                            if (task.isSuccessful())
-                            {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.e(TAG, "createUserWithEmail:success");
-                                // FirebaseUser user = mAuth.getCurrentUser();
-
-                                HashMap<String, Object> hashMap = new HashMap<String, Object>();
-                                hashMap.put(MyConstant.USER_PHOTO, imagePath);
-                                hashMap.put(MyConstant.USER_NAME, name);
-                                hashMap.put(MyConstant.USER_EMAIL, email);
-                                hashMap.put(MyConstant.USER_PHONE, phoneNumber);
-                                hashMap.put(MyConstant.USER_ALLOWED, "false");
-
-                                String userType = (String) spinnerUserType.getSelectedItem();
-                                if (userType.equals("Admin"))
-                                {
-                                    MyFirebase.getInstance().createUser(context, MyConstant.ADMIN, hashMap);
-                                }
-                                else if (userType.equals("Sub Admin"))
-                                {
-                                    MyFirebase.getInstance().createUser(context, MyConstant.SUB_ADMIN, hashMap);
-                                }
-                                else if (userType.equals("Beat"))
-                                {
-                                    hashMap.put(MyConstant.RANGE, spinnerRange.getSelectedItem());
-                                    hashMap.put(MyConstant.BLOCK, spinnerBlock.getSelectedItem());
-                                    hashMap.put(MyConstant.BEAT, spinnerBeat.getSelectedItem());
-                                    hashMap.put(MyConstant.HEADQUATER, textViewHeadquater.getText().toString());
-
-
-                                    MyFirebase.getInstance().createUser(context, MyConstant.BEAT, hashMap);
-                                }
-                            }
-                            else
-                            {
-                                CommonDialogs.getInstance().dialog.dismiss();
-
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure  ", task.getException());
-
-                                CommonMethods.getInstance().show_snackbar(view, context, task.getException().getMessage());
-                            }
-
-
-                        }
-                    });
+                        createUser(email, password, name, phoneNumber,imagePath);
+                    }
+                });
+            }
+            else
+            {
+                CommonDialogs.getInstance().progressDialog(context);
+                createUser(email, password, name, phoneNumber,"");
+            }
         }
 
 
+    }
+
+
+    public interface onImageUpload
+    {
+        void imagePathAfterUpload(String path);
+    }
+
+
+    void createUser(final String email, String password, final String name, final String phoneNumber, final String firebaseImagePath)
+    {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.e(TAG, "createUserWithEmail:success");
+                            // FirebaseUser user = mAuth.getCurrentUser();
+
+                            HashMap<String, Object> hashMap = new HashMap<String, Object>();
+                            hashMap.put(MyConstant.USER_PHOTO, firebaseImagePath);
+                            hashMap.put(MyConstant.USER_NAME, name);
+                            hashMap.put(MyConstant.USER_EMAIL, email);
+                            hashMap.put(MyConstant.USER_PHONE, phoneNumber);
+                            hashMap.put(MyConstant.USER_ALLOWED, "false");
+
+                            String userType = (String) spinnerUserType.getSelectedItem();
+                            if (userType.equals("Admin"))
+                            {
+                                MyFirebase.getInstance().createUser(context, MyConstant.ADMIN, hashMap);
+                            }
+                            else if (userType.equals("Sub Admin"))
+                            {
+                                MyFirebase.getInstance().createUser(context, MyConstant.SUB_ADMIN, hashMap);
+                            }
+                            else if (userType.equals("Beat"))
+                            {
+                                hashMap.put(MyConstant.RANGE, spinnerRange.getSelectedItem());
+                                hashMap.put(MyConstant.BLOCK, spinnerBlock.getSelectedItem());
+                                hashMap.put(MyConstant.BEAT, spinnerBeat.getSelectedItem());
+                                hashMap.put(MyConstant.HEADQUATER, textViewHeadquater.getText().toString());
+
+
+                                MyFirebase.getInstance().createUser(context, MyConstant.BEAT, hashMap);
+                            }
+                        }
+                        else
+                        {
+                            CommonDialogs.getInstance().dialog.dismiss();
+
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "createUserWithEmail:failure  ", task.getException());
+
+                            CommonMethods.getInstance().show_snackbar(view, context, task.getException().getMessage());
+                        }
+
+
+                    }
+                });
     }
 
 
