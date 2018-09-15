@@ -14,6 +14,7 @@ public class GuardDataModel
     String beatBlock;
     String beatBeat;
     String beatHeadquater;
+    String beatPhoto;
 
     public String getBeatRange()
     {
@@ -93,5 +94,15 @@ public class GuardDataModel
     public void setBeatPhoneNumber(String beatPhoneNumber)
     {
         this.beatPhoneNumber = beatPhoneNumber;
+    }
+
+    public String getBeatPhoto()
+    {
+        return beatPhoto;
+    }
+
+    public void setBeatPhoto(String beatPhoto)
+    {
+        this.beatPhoto = beatPhoto;
     }
 }

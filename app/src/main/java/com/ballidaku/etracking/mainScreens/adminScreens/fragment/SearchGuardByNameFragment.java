@@ -69,7 +69,7 @@ public class SearchGuardByNameFragment extends Fragment
 
     private void setUpViews()
     {
-        recycleViewGuard = (RecyclerView) view.findViewById(R.id.recycleViewGuard);
+        recycleViewGuard = view.findViewById(R.id.recycleViewGuard);
 
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(context);

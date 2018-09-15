@@ -85,6 +85,13 @@ public class MySharedPreference
         return getPreference(context).getString(MyConstant.USER_NAME,"");
     }
 
+    public void saveUserData(Context context,String key,String value)
+    {
+        SharedPreferences.Editor editor = getPreference(context).edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
     public void clearUserID(Context context)
     {
          getPreference(context).edit().putString(MyConstant.USER_ID,"").apply();

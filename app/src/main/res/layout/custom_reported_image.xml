@@ -95,8 +95,8 @@
                 android:id="@+id/linearLayoutShareDelete"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:background="@color/colorBlackTransparent">
+                android:background="@color/colorBlackTransparent"
+                android:gravity="center">
 
                 <ImageView
                     android:id="@+id/imageViewShareDelete"

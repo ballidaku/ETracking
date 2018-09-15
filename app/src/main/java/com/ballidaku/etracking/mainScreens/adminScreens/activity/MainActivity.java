@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +41,8 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
     public Toolbar toolbar;
 
     ImageView imageViewProfilePic;
+    TextView textViewName;
+    TextView textViewEmail;
 
     DrawerLayout drawer;
 
@@ -81,7 +84,7 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -94,20 +97,57 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
     private void setUpData()
     {
         View headerLayout = navigationView.getHeaderView(0);
-        ((TextView) headerLayout.findViewById(R.id.textViewName)).setText(MySharedPreference.getInstance().getUserName(context));
-        ((TextView) headerLayout.findViewById(R.id.textViewEmail)).setText(MySharedPreference.getInstance().getUserEmail(context));
+
+        textViewName= headerLayout.findViewById(R.id.textViewName);
+        textViewEmail=headerLayout.findViewById(R.id.textViewEmail);
 
         imageViewProfilePic=headerLayout.findViewById(R.id.imageViewProfilePic);
 
         headerLayout.findViewById(R.id.linearLayoutMainHeader).setOnClickListener(this);
 
         drawer = findViewById(R.id.drawer_layout);
+
+        drawer.addDrawerListener(new DrawerLayout.DrawerListener()
+        {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset)
+            {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView)
+            {
+                textViewName.setText(MySharedPreference.getInstance().getUserName(context));
+                textViewEmail.setText(MySharedPreference.getInstance().getUserEmail(context));
+
+                String userPhoto=MySharedPreference.getInstance().getUserPhoto(context);
+                if(!userPhoto.isEmpty())
+                {
+                    CommonMethods.getInstance().showImageGlide(context, imageViewProfilePic, MySharedPreference.getInstance().getUserPhoto(context));
+                }
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView)
+            {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState)
+            {
+
+            }
+        });
+
+
     }
 
     @Override
     public void onBackPressed()
     {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer =  findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START))
         {
             drawer.closeDrawer(GravityCompat.START);

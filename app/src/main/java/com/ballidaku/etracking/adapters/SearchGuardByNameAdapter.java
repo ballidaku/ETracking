@@ -1,10 +1,12 @@
 package com.ballidaku.etracking.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ballidaku.etracking.R;
@@ -17,10 +19,10 @@ import java.util.ArrayList;
  * Created by sharanpalsingh on 02/10/17.
  */
 
-public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardByNameAdapter.MyViewHolder>
+public class SearchGuardByNameAdapter extends RecyclerView.Adapter<SearchGuardByNameAdapter.MyViewHolder>
 {
 
-    String TAG="SearchGuardByNameAdapter";
+    String TAG = "SearchGuardByNameAdapter";
 
     private Context context;
 
@@ -47,8 +49,9 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
         return position;
     }
 
+    @NonNull
     @Override
-    public SearchGuardByNameAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+    public SearchGuardByNameAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
 
         View itemView = LayoutInflater.from(parent.getContext())
@@ -58,7 +61,7 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
     }
 
     @Override
-    public void onBindViewHolder(final SearchGuardByNameAdapter.MyViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull final SearchGuardByNameAdapter.MyViewHolder holder, int position)
     {
 
         holder.textViewBeatName.setText(arrayList.get(position).getBeatName());
@@ -68,6 +71,17 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
         holder.textViewBlock.setText(arrayList.get(position).getBeatBlock());
         holder.textViewBeat.setText(arrayList.get(position).getBeatBeat());
         holder.textViewHeadquater.setText(arrayList.get(position).getBeatHeadquater());
+
+        if(arrayList.get(position).getBeatPhoto()!=null && !arrayList.get(position).getBeatPhoto().isEmpty())
+        {
+            CommonMethods.getInstance().showImageGlide(context, holder.imageViewProfile, arrayList.get(position).getBeatPhoto());
+        }
+        else
+        {
+            CommonMethods.getInstance().showImageGlide(context, holder.imageViewProfile, "");
+        }
+
+
     }
 
     @Override
@@ -85,18 +99,20 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
         public TextView textViewBlock;
         public TextView textViewBeat;
         public TextView textViewHeadquater;
+        ImageView imageViewProfile;
 
-        public MyViewHolder(View view)
+        MyViewHolder(View view)
         {
             super(view);
 
-            textViewBeatName = (TextView) view.findViewById(R.id.textViewBeatName);
-            textViewPhoneNumber = (TextView) view.findViewById(R.id.textViewPhoneNumber);
-            textViewEmail = (TextView) view.findViewById(R.id.textViewEmail);
-            textViewRange = (TextView) view.findViewById(R.id.textViewRange);
-            textViewBlock = (TextView) view.findViewById(R.id.textViewBlock);
-            textViewBeat = (TextView) view.findViewById(R.id.textViewBeat);
-            textViewHeadquater = (TextView) view.findViewById(R.id.textViewHeadquater);
+            textViewBeatName = view.findViewById(R.id.textViewBeatName);
+            textViewPhoneNumber = view.findViewById(R.id.textViewPhoneNumber);
+            textViewEmail = view.findViewById(R.id.textViewEmail);
+            textViewRange = view.findViewById(R.id.textViewRange);
+            textViewBlock = view.findViewById(R.id.textViewBlock);
+            textViewBeat = view.findViewById(R.id.textViewBeat);
+            textViewHeadquater = view.findViewById(R.id.textViewHeadquater);
+            imageViewProfile = view.findViewById(R.id.imageViewProfile);
 
 
             textViewPhoneNumber.setOnClickListener(new View.OnClickListener()
@@ -104,7 +120,7 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
                 @Override
                 public void onClick(View v)
                 {
-                    CommonMethods.getInstance().call(context,textViewPhoneNumber.getText().toString().trim());
+                    CommonMethods.getInstance().call(context, textViewPhoneNumber.getText().toString().trim());
                 }
             });
 
@@ -125,9 +141,6 @@ public class SearchGuardByNameAdapter  extends RecyclerView.Adapter<SearchGuardB
 
         searchGuardByCategoryFragment.getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
     }*/
-
-
-
 
 
 }

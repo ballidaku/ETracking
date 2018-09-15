@@ -14,6 +14,7 @@ import com.ballidaku.etracking.dataModels.ImageDataModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
 import com.ballidaku.etracking.frontScreens.SignUpActivity;
+import com.ballidaku.etracking.mainScreens.ProfileActivity;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.BeatActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.ReportOffenceActivity;
@@ -72,6 +73,31 @@ public class MyFirebase<T>
     {
         String key = root.child(MyConstant.USERS).child(userType).push().getKey();
         create(context, userType, key, map);
+
+    }
+
+    public void updateUser(final Context context, HashMap<String, Object> map, final ProfileActivity.OnCompleteListener onCompleteListener)
+    {
+        root.child(MyConstant.USERS).child(MySharedPreference.getInstance().getUserType(context)).child(MySharedPreference.getInstance().getUserID(context)).updateChildren(map).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+
+                dismissDialog();
+
+                if(task.isSuccessful())
+                {
+                    onCompleteListener.onComplete();
+                    CommonMethods.getInstance().show_Toast(context, "User updated successfully");
+                }
+                else
+                {
+                    CommonMethods.getInstance().show_Toast(context, "Please try again");
+                }
+            }
+        });
+
 
     }
 
@@ -621,6 +647,11 @@ public class MyFirebase<T>
                     beatDataModel.setBeatBlock((String) child.child(MyConstant.BLOCK).getValue());
                     beatDataModel.setBeatBeat((String) child.child(MyConstant.BEAT).getValue());
                     beatDataModel.setBeatHeadquater((String) child.child(MyConstant.HEADQUATER).getValue());
+
+                    if(child.hasChild(MyConstant.USER_PHOTO))
+                    {
+                        beatDataModel.setBeatPhoto((String) child.child(MyConstant.USER_PHOTO).getValue());
+                    }
 
                     arrayList.add(beatDataModel);
                 }

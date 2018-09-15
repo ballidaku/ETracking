@@ -20,14 +20,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
+import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
+import com.ballidaku.etracking.commonClasses.MyConstant;
+import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
+import com.ballidaku.etracking.frontScreens.SignUpActivity;
 import com.theartofdev.edmodo.cropper.CropImage;
+
+import java.util.HashMap;
 
 public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements View.OnClickListener
 {
@@ -51,6 +58,8 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
     LinearLayout linearLayoutBeat;
 
     ImageView imageViewProfile;
+
+    ScrollView scrollView;
 
     private static final int CAMERA_REQUEST = 13;
     private static final int PICK_IMAGE_GALLERY = 14;
@@ -85,6 +94,8 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_back);
 
+
+        scrollView = findViewById(R.id.scrollView);
         linearLayoutBeat = findViewById(R.id.linearLayoutBeat);
 
         ((TextView) findViewById(R.id.textViewTitle)).setText("Profile");
@@ -105,7 +116,6 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         imageViewProfile.setOnClickListener(this);
 
 
-
         setValues();
     }
 
@@ -113,13 +123,17 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
     {
 
         String userType = MySharedPreference.getInstance().getUserType(context).toUpperCase();
+
         textViewUserType.setText(userType);
         editTextName.setText(MySharedPreference.getInstance().getUserName(context));
         editTextEmail.setText(MySharedPreference.getInstance().getUserEmail(context));
         editTextPhone.setText(MySharedPreference.getInstance().getUserPhone(context));
 
-        CommonMethods.getInstance().showImageGlide(context,imageViewProfile,MySharedPreference.getInstance().getUserPhoto(context));
-
+        String userPhoto=MySharedPreference.getInstance().getUserPhoto(context);
+        if(!userPhoto.isEmpty())
+        {
+            CommonMethods.getInstance().showImageGlide(context, imageViewProfile, MySharedPreference.getInstance().getUserPhoto(context));
+        }
 
         nameKeyListener = editTextName.getKeyListener();
         phoneKeyListener = editTextPhone.getKeyListener();
@@ -165,19 +179,17 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
 
             case R.id.edit:
 
-
                 isEditable = true;
-
-                if(isEditable)
+                if (isEditable)
                 {
                     makeEditable();
                 }
-
 
                 return true;
 
             case R.id.save:
 
+                checkData();
 
                 return true;
 
@@ -186,15 +198,90 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         }
     }
 
+    private void checkData()
+    {
+        final String name = editTextName.getText().toString();
+        final String phoneNumber = editTextPhone.getText().toString();
+
+        if (name.isEmpty())
+        {
+            CommonMethods.getInstance().show_snackbar(scrollView, context, "Please enter name.");
+        }
+        else if (phoneNumber.isEmpty())
+        {
+            CommonMethods.getInstance().show_snackbar(scrollView, context, "Please enter phone number.");
+        }
+        else if (!CommonMethods.getInstance().isValidMobile(phoneNumber))
+        {
+            CommonMethods.getInstance().show_snackbar(scrollView, context, "Please enter phone number of 10 digits.");
+        }
+
+        if (!imagePath.isEmpty())
+        {
+            MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new SignUpActivity.onImageUpload()
+            {
+                @Override
+                public void imagePathAfterUpload(String path)
+                {
+                    updateData(name, phoneNumber, imagePath);
+                }
+            });
+        }
+        else
+        {
+            CommonDialogs.getInstance().progressDialog(context);
+            updateData(name, phoneNumber, "");
+        }
+    }
+
+    void updateData(final String name, final String phoneNumber, final String imagePath)
+    {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        if (!imagePath.isEmpty())
+        {
+            hashMap.put(MyConstant.USER_PHOTO, imagePath);
+        }
+        hashMap.put(MyConstant.USER_NAME, name);
+        hashMap.put(MyConstant.USER_PHONE, phoneNumber);
+
+
+        MyFirebase.getInstance().updateUser(context, hashMap, new OnCompleteListener()
+        {
+            @Override
+            public void onComplete()
+            {
+                MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_NAME,name);
+                MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_PHONE,phoneNumber);
+
+                if (!imagePath.isEmpty())
+                {
+                    MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_PHOTO,imagePath);
+                }
+
+                makeNonEditable();
+
+            }
+        });
+
+    }
+
+    public interface OnCompleteListener
+    {
+        void onComplete();
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-
-
         if (isEditable)
         {
             menu.clear();
             getMenuInflater().inflate(R.menu.menu_save, menu);
+        }
+        else
+        {
+            menu.clear();
+            getMenuInflater().inflate(R.menu.admin_menu, menu);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -207,7 +294,15 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         invalidateOptionsMenu();
     }
 
+    void makeNonEditable()
+    {
+        editTextName.setKeyListener(null);
+        editTextPhone.setKeyListener(null);
 
+        isEditable=false;
+
+        invalidateOptionsMenu();
+    }
 
 
     @Override
