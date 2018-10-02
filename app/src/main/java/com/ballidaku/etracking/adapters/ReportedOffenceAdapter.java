@@ -243,7 +243,7 @@ public class ReportedOffenceAdapter extends RecyclerView.Adapter<ReportedOffence
                 showDeleteIcon=false;
                 notifyDataSetChanged();
                 CommonDialogs.getInstance().dialog.dismiss();
-                CommonMethods.getInstance().show_Toast(context, "Offence deleted successfully");
+                CommonMethods.getInstance().showToast(context, "Offence deleted successfully");
             }
 
             @Override

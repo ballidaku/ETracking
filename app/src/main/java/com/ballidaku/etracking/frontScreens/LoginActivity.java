@@ -100,9 +100,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                                 CommonDialogs.getInstance().dialog.dismiss();
 
                                 if (task.isSuccessful()) {
-                                    CommonMethods.getInstance().show_Toast(context, "We have sent you link to reset your password!");
+                                    CommonMethods.getInstance().showToast(context, "We have sent you link to reset your password!");
                                 } else {
-                                    CommonMethods.getInstance().show_Toast(context,"Failed to send reset email!");
+                                    CommonMethods.getInstance().showToast(context,"Failed to send reset email!");
                                 }
 
                             }

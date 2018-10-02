@@ -9,6 +9,13 @@ public class MyConstant
 
     public static final String SPACE=" : ";
 
+    public static final int CAMERA_REQUEST = 13;
+    public static final int PICK_IMAGE_GALLERY = 14;
+    public static final int REQUEST_VIDEO_CAPTURE = 15;
+
+    public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    public static final int REQUEST_CHECK_SETTINGS = 10;
+    public static final int SMS_REQUEST = 2013;
 
     public static final String USER_PHOTO="user_photo";
     public static final String USER_NAME="user_name";
@@ -27,9 +34,12 @@ public class MyConstant
     public static final String LAST_LOCATION="last_location";
 
     public static final String REPORTED_IMAGES="reported_images";
+    public static final String REPORTED_VIDEOS="reported_videos";
     public static final String REPORTED_OFFENCE="reported_offence";
     public static final String REPORTED_TIME="reported_time";
     public static final String IMAGE_PATH="image_path";
+    public static final String VIDEO_PATH="video_path";
+    public static final String VIDEO_THUMBNAIL="video_thumbnail";
 
     public static final String ADMIN="admin";
     public static final String SUB_ADMIN="sub_admin";

@@ -9,8 +9,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera"/>
 
     <application
         android:name=".commonClasses.MyApplication"
@@ -59,29 +60,30 @@
             android:name=".mainScreens.beatScreens.ReportedImagesActivity"
             android:label=""
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".mainScreens.beatScreens.ReportedVideosActivity"
+                  android:label=""
+                  android:screenOrientation="portrait"/>
+
         <activity
             android:name=".mainScreens.ProfileActivity"
             android:label=""/>
-
         <activity
             android:name=".mainScreens.beatScreens.ReportOffenceActivity"
             android:label=""
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"/>
-
-
-        <activity android:name=".mainScreens.beatScreens.ViewReportedOffenceActivity"
-                  android:label=""
-                  android:screenOrientation="portrait"/>
-
-
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-                  android:theme="@style/Base.Theme.AppCompat"/>
+        <activity
+            android:name=".mainScreens.beatScreens.ViewReportedOffenceActivity"
+            android:label=""
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="c1ebda239809615578cf710b8654d41759688dfb" />
-
+            android:value="c1ebda239809615578cf710b8654d41759688dfb"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -92,6 +94,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
+
 
     </application>
 

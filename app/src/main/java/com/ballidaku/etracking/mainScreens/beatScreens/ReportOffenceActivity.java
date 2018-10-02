@@ -19,7 +19,7 @@ import android.widget.TextView;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
-import com.ballidaku.etracking.commonClasses.CompressionClass;
+import com.ballidaku.etracking.commonClasses.CompressImageVideo;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 
@@ -158,12 +158,12 @@ public class ReportOffenceActivity extends AbsRuntimeMarshmallowPermission imple
     void capture()
     {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageFile());
+//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageUri());
 
         Uri apkURI = FileProvider.getUriForFile(
                 context,
                 context.getApplicationContext()
-                        .getPackageName() + ".provider", CommonMethods.getInstance().getTempraryImageFile2());
+                        .getPackageName() + ".provider", CompressImageVideo.getInstance().getTempraryImageFile(context));
 
         intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
 
@@ -180,24 +180,11 @@ public class ReportOffenceActivity extends AbsRuntimeMarshmallowPermission imple
 
                 if (resultCode == Activity.RESULT_OK)
                 {
-                    /*try
-                    {*/
                         isImageClicked=true;
-
-
-                        //photo = CommonMethods.getInstance().decodeUri(context, CommonMethods.getInstance().getTempraryImageFile());
-
-                         imagePath= CompressionClass.getInstance().compressImage(context,CommonMethods.getInstance().getTempraryImageFile());
-
+                         imagePath= CompressImageVideo.getInstance().compressImage(context,CompressImageVideo.getInstance().getTempraryImageUri(context));
                         // MyFirebase.getInstance().saveImage(context, photo);
-
                         //imageViewReportOffence.setImageBitmap(photo);
                         imageViewReportOffence.setImageURI(Uri.parse("file://"+imagePath));
-                    /*}
-                    catch (FileNotFoundException e)
-                    {
-                        e.printStackTrace();
-                    }*/
                 }
                 break;
         }

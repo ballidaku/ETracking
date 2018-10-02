@@ -115,7 +115,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_80sdp"
+            android:layout_height="@dimen/_60sdp"
             android:orientation="horizontal">
 
             <Button
@@ -126,19 +126,6 @@
                 android:text="report by image"/>
 
 
-            <Button
-                android:id="@+id/buttonReportOffence"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="report offence"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_80sdp"
-            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/buttonViewImageReport"
@@ -147,6 +134,44 @@
                 android:layout_weight="1"
                 android:text="view reported images"/>
 
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_60sdp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonVideoReport"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="report by video"/>
+
+
+
+            <Button
+                android:id="@+id/buttonViewReportedVideos"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="view reported videos"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_60sdp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonReportOffence"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="report offence"/>
 
             <Button
                 android:id="@+id/buttonViewReportedOffence"

@@ -4,6 +4,7 @@ import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
+import com.ballidaku.etracking.dataModels.VideoDataModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,10 @@ public class Interfaces
         public void callback(ArrayList<ImageDataModel> arrayList);
     }
 
+    public interface ReportedVideosListener {
+        public void callback(ArrayList<VideoDataModel> arrayList);
+    }
+
     public interface ReportedOffenceListener {
         public void callback(ArrayList<OffenceDataModel> arrayList);
     }
@@ -57,6 +62,15 @@ public class Interfaces
 
     public interface DrawPathListener {
         public void drawPath(ArrayList<BeatLocationModel.DateLocation>  arrayList);
+    }
+
+    public interface CompressionInterface {
+     public void onCompressionCompleted(String path);
+    }
+
+    public interface onImageUpload
+    {
+        void imagePathAfterUpload(String path);
     }
 
 }

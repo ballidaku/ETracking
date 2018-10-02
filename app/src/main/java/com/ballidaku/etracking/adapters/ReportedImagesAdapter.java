@@ -237,7 +237,7 @@ public class ReportedImagesAdapter extends RecyclerView.Adapter<ReportedImagesAd
                 showDeleteIcon=false;
                 notifyDataSetChanged();
                 CommonDialogs.getInstance().dialog.dismiss();
-                CommonMethods.getInstance().show_Toast(context, "Image deleted successfully");
+                CommonMethods.getInstance().showToast(context, "Image deleted successfully");
             }
 
             @Override

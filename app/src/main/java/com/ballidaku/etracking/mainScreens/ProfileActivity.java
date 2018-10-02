@@ -3,17 +3,11 @@ package com.ballidaku.etracking.mainScreens;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,16 +16,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
+import com.ballidaku.etracking.commonClasses.CompressImageVideo;
+import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
-import com.ballidaku.etracking.frontScreens.SignUpActivity;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.HashMap;
@@ -61,12 +55,7 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
 
     ScrollView scrollView;
 
-    private static final int CAMERA_REQUEST = 13;
-    private static final int PICK_IMAGE_GALLERY = 14;
-
-    //Bitmap photo;
     String imagePath = "";
-
 
     boolean isEditable;
 
@@ -129,8 +118,8 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         editTextEmail.setText(MySharedPreference.getInstance().getUserEmail(context));
         editTextPhone.setText(MySharedPreference.getInstance().getUserPhone(context));
 
-        String userPhoto=MySharedPreference.getInstance().getUserPhoto(context);
-        if(!userPhoto.isEmpty())
+        String userPhoto = MySharedPreference.getInstance().getUserPhoto(context);
+        if (!userPhoto.isEmpty())
         {
             CommonMethods.getInstance().showImageGlide(context, imageViewProfile, MySharedPreference.getInstance().getUserPhoto(context));
         }
@@ -218,7 +207,7 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
 
         if (!imagePath.isEmpty())
         {
-            MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new SignUpActivity.onImageUpload()
+            MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new Interfaces.onImageUpload()
             {
                 @Override
                 public void imagePathAfterUpload(String path)
@@ -250,12 +239,12 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
             @Override
             public void onComplete()
             {
-                MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_NAME,name);
-                MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_PHONE,phoneNumber);
+                MySharedPreference.getInstance().saveUserData(context, MyConstant.USER_NAME, name);
+                MySharedPreference.getInstance().saveUserData(context, MyConstant.USER_PHONE, phoneNumber);
 
                 if (!imagePath.isEmpty())
                 {
-                    MySharedPreference.getInstance().saveUserData(context,MyConstant.USER_PHOTO,imagePath);
+                    MySharedPreference.getInstance().saveUserData(context, MyConstant.USER_PHOTO, imagePath);
                 }
 
                 makeNonEditable();
@@ -299,7 +288,7 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
         editTextName.setKeyListener(null);
         editTextPhone.setKeyListener(null);
 
-        isEditable=false;
+        isEditable = false;
 
         invalidateOptionsMenu();
     }
@@ -327,134 +316,57 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
     @Override
     public void onPermissionGranted(int requestCode)
     {
-        Log.e(TAG, "onPermissionGranted " + requestCode);
         if (requestCode == 54)
         {
-            selectImage();
+            CommonDialogs.getInstance().selectImageDialog(context, null);
         }
-    }
-
-    private void selectImage()
-    {
-        try
-        {
-            PackageManager pm = getPackageManager();
-            int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, getPackageName());
-            if (hasPerm == PackageManager.PERMISSION_GRANTED)
-            {
-                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
-                builder.setTitle("Select Option");
-                builder.setItems(options, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int item)
-                    {
-                        if (options[item].equals("Take Photo"))
-                        {
-                            dialog.dismiss();
-                            capture();
-                        }
-                        else if (options[item].equals("Choose From Gallery"))
-                        {
-                            dialog.dismiss();
-                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
-                        }
-                        else if (options[item].equals("Cancel"))
-                        {
-                            dialog.dismiss();
-                        }
-                    }
-                });
-                builder.show();
-            }
-            else
-                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    void capture()
-    {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageFile());
-
-        Uri apkURI = FileProvider.getUriForFile(
-                context,
-                context.getApplicationContext()
-                        .getPackageName() + ".provider", CommonMethods.getInstance().getTempraryImageFile2());
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
-
-        startActivityForResult(intent, CAMERA_REQUEST);
     }
 
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+
+        if (resultCode != -1)
+            return;
+
         switch (requestCode)
         {
-            case CAMERA_REQUEST:
+            case MyConstant.CAMERA_REQUEST:
 
                 if (resultCode == Activity.RESULT_OK)
                 {
+                    String imagePathTemp = CompressImageVideo.getInstance().getTempraryImageUri(context).toString();
 
-//                    imagePath = CompressionClass.getInstance().compressImage(context, CommonMethods.getInstance().getTempraryImageFile());
-                    imagePath = CommonMethods.getInstance().getTempraryImageFile().toString();
-
-                    // start cropping activity for pre-acquired image saved on the device
-                    CropImage.activity(Uri.parse("file://" + imagePath))
-                            .setAspectRatio(1, 1)
-                            .start(this);
+                    CropImage.activity(Uri.parse("file://" + imagePathTemp)).setAspectRatio(1, 1).start(this);
                 }
                 break;
 
-
-            case PICK_IMAGE_GALLERY:
+            case MyConstant.PICK_IMAGE_GALLERY:
 
                 Uri selectedImage = data.getData();
-
-                imagePath = getRealPathFromURI(selectedImage);
-
-
-                CropImage.activity(Uri.parse("file://" + imagePath))
-                        .setAspectRatio(1, 1)
-                        .start(this);
+                CropImage.activity(selectedImage).setAspectRatio(1, 1).start(this);
 
                 break;
 
-
             case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
+
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
                 if (resultCode == RESULT_OK)
                 {
                     Uri resultUri = result.getUri();
+                    imagePath = CompressImageVideo.getInstance().getRealPathFromURI(context, resultUri);
 
-                    imageViewProfile.setImageURI(resultUri);
+
+                    CommonMethods.getInstance().showImageGlide(context, imageViewProfile, imagePath);
                 }
                 else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
                 {
-                    Exception error = result.getError();
+                    CommonMethods.getInstance().showToast(context, result.getError().toString());
                 }
 
                 break;
 
         }
-    }
-
-
-    public String getRealPathFromURI(Uri contentUri)
-    {
-        String[] proj = {MediaStore.Audio.Media.DATA};
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
 }

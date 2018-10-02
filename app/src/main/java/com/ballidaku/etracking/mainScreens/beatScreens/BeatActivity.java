@@ -33,7 +33,8 @@ import android.widget.Toast;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
-import com.ballidaku.etracking.commonClasses.CompressionClass;
+import com.ballidaku.etracking.commonClasses.CompressImageVideo;
+import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
@@ -80,10 +81,6 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     private final static String LOCATION_KEY = "location-key";
     private final static String LAST_UPDATED_TIME_STRING_KEY = "last-updated-time-string-key";
 
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private static final int REQUEST_CHECK_SETTINGS = 10;
-    private static final int CAMERA_REQUEST = 13;
-    private static final int SMS_REQUEST = 2013;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -134,24 +131,25 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
 
     private void setUpViews()
     {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         ((TextView) findViewById(R.id.textViewTitle)).setText("Tracking");
 
 
-        buttonStart = (Button) findViewById(R.id.buttonStart);
-        buttonStop = (Button) findViewById(R.id.buttonStop);
-        buttonImageReport = (Button) findViewById(R.id.buttonImageReport);
-        buttonViewImageReport = (Button) findViewById(R.id.buttonViewImageReport);
-        buttonReportOffence = (Button) findViewById(R.id.buttonReportOffence);
-        buttonViewReportedOffence = (Button) findViewById(R.id.buttonViewReportedOffence);
+        buttonStart = findViewById(R.id.buttonStart);
+        buttonStop = findViewById(R.id.buttonStop);
+        buttonImageReport = findViewById(R.id.buttonImageReport);
+        buttonViewImageReport = findViewById(R.id.buttonViewImageReport);
+        buttonReportOffence = findViewById(R.id.buttonReportOffence);
+        buttonViewReportedOffence = findViewById(R.id.buttonViewReportedOffence);
+
         findViewById(R.id.buttonViewSendSOS).setOnClickListener(this);
+        findViewById(R.id.buttonVideoReport).setOnClickListener(this);
+        findViewById(R.id.buttonViewReportedVideos).setOnClickListener(this);
 
 
-//        latitude_text = (TextView) findViewById(R.id.latitude_text);
-//        longitude_text = (TextView) findViewById(R.id.longitude_text);
-        textViewLastUpdateTime = (TextView) findViewById(R.id.textViewLastUpdateTime);
+        textViewLastUpdateTime = findViewById(R.id.textViewLastUpdateTime);
 
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
@@ -189,6 +187,15 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
                 startActivity(new Intent(context, ReportedImagesActivity.class));
                 break;
 
+            case R.id.buttonVideoReport:
+                String[] permission1 = {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                requestAppPermissions(permission1, R.string.permission, 55);
+                break;
+
+            case R.id.buttonViewReportedVideos:
+                startActivity(new Intent(context, ReportedVideosActivity.class));
+                break;
+
             case R.id.buttonReportOffence:
                 startActivity(new Intent(context, ReportOffenceActivity.class));
                 break;
@@ -202,8 +209,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
             case R.id.buttonViewSendSOS:
 
                 String[] permissionNEW = {Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-                requestAppPermissions(permissionNEW, R.string.permission, SMS_REQUEST);
-
+                requestAppPermissions(permissionNEW, R.string.permission, MyConstant.SMS_REQUEST);
 
                 break;
         }
@@ -265,13 +271,9 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
         sm.sendTextMessage(number, null, message, null, null);
 
 
-        CommonMethods.getInstance().show_Toast(context, "Message send successfully");
+        CommonMethods.getInstance().showToast(context, "Message send successfully");
 
     }
-
-//    public void forceCrash(View view) {
-//        throw new RuntimeException("This is a crash");
-//    }
 
 
     @Override
@@ -314,14 +316,26 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     @Override
     public void onPermissionGranted(int requestCode)
     {
-        Log.e(TAG, "onPermissionGranted " + requestCode);
         if (requestCode == 54)
         {
             capture();
         }
-        else if (requestCode == SMS_REQUEST)
+        else if (requestCode == 55)
+        {
+            dispatchTakeVideoIntent();
+        }
+        else if (requestCode == MyConstant.SMS_REQUEST)
         {
             sendSOS();
+        }
+    }
+
+    private void dispatchTakeVideoIntent()
+    {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if (takeVideoIntent.resolveActivity(getPackageManager()) != null)
+        {
+            startActivityForResult(takeVideoIntent, MyConstant.REQUEST_VIDEO_CAPTURE);
         }
     }
 
@@ -329,21 +343,15 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     void capture()
     {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageFile());
-
-
         Uri apkURI = FileProvider.getUriForFile(
                 context,
                 context.getApplicationContext()
-                        .getPackageName() + ".provider", CommonMethods.getInstance().getTempraryImageFile2());
-//        intent.setDataAndType(apkURI, getMimeType(CommonMethods.getInstance().getTempraryImageFile2().toString()));
+                        .getPackageName() + ".provider", CompressImageVideo.getInstance().getTempraryImageFile(context));
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
 
-        startActivityForResult(intent, CAMERA_REQUEST);
+        startActivityForResult(intent, MyConstant.CAMERA_REQUEST);
     }
-
-
 
     private void updateValuesFromBundle(Bundle savedInstanceState)
     {
@@ -423,7 +431,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
             }
             else
             {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MyConstant.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
             }
         }
     }
@@ -467,7 +475,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
                         // Since the setting is not valid, a dialog is displayed
                         try
                         {
-                            status.startResolutionForResult(BeatActivity.this, REQUEST_CHECK_SETTINGS);
+                            status.startResolutionForResult(BeatActivity.this, MyConstant.REQUEST_CHECK_SETTINGS);
                         }
                         catch (IntentSender.SendIntentException e)
                         {
@@ -499,27 +507,18 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
 
     private void clearUI()
     {
-//        latitude_text.setText("");
-//        longitude_text.setText("");
         textViewLastUpdateTime.setText("");
     }
 
     private void updateUI()
     {
         if (mCurrentLocation == null) return;
-
-//        latitude_text.setText(String.format("%s: %f", mLatitudeLabel,
-//                mCurrentLocation.getLatitude()));
-//        longitude_text.setText(String.format("%s: %f", mLongitudeLabel,
-//                mCurrentLocation.getLongitude()));
         textViewLastUpdateTime.setText(mLastUpdateTime);
     }
 
     protected void stopLocationUpdates()
     {
         Log.i(TAG, "stopLocationUpdates");
-        // The final argument to {@code requestLocationUpdates()} is a LocationListener
-        // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, BeatActivity.this);
     }
 
@@ -528,7 +527,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     {
         switch (requestCode)
         {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
+            case MyConstant.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
             {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
@@ -561,7 +560,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
                     public void onClick(DialogInterface dialog, int which)
                     {
                         ActivityCompat.requestPermissions(BeatActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MyConstant.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                     }
                 })
                 .setNegativeButton("しない", new DialogInterface.OnClickListener()
@@ -591,11 +590,11 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         switch (requestCode)
         {
-            case REQUEST_CHECK_SETTINGS:
+            case MyConstant.REQUEST_CHECK_SETTINGS:
                 switch (resultCode)
                 {
                     case Activity.RESULT_OK:
@@ -606,22 +605,37 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
                 }
                 break;
 
-            case CAMERA_REQUEST:
+            case MyConstant.CAMERA_REQUEST:
 
                 if (resultCode == Activity.RESULT_OK)
                 {
-                   /* try
-                    {*/
-                    // Bitmap photo = CommonMethods.getInstance().decodeUri(context, CommonMethods.getInstance().getTempraryImageFile());
-
-                    String imagePath = CompressionClass.getInstance().compressImage(context, CommonMethods.getInstance().getTempraryImageFile());
-
+                    String imagePath = CompressImageVideo.getInstance().compressImage(context, CompressImageVideo.getInstance().getTempraryImageUri(context));
                     MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.IMAGE, null);
-                    /*}
-                    catch (FileNotFoundException e)
+                }
+                break;
+
+            case MyConstant.REQUEST_VIDEO_CAPTURE:
+
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    Uri videoUri = intent.getData();
+
+                    final String videoPath = CompressImageVideo.getInstance().getRealPathFromURI(context, videoUri);
+
+                    CompressImageVideo.getInstance().compressVideo(context, videoPath, new Interfaces.CompressionInterface()
                     {
-                        e.printStackTrace();
-                    }*/
+                        @Override
+                        public void onCompressionCompleted(String path)
+                        {
+                            CompressImageVideo.getInstance().deletePath(videoPath);
+
+                            MyFirebase.getInstance().saveVideo(context, path);
+
+                            Log.e(TAG, "Compress VideoPath : " + path);
+                        }
+                    });
+                    Log.e(TAG, "VideoPath : " + videoPath);
+
                 }
                 break;
         }
@@ -640,10 +654,6 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
     {
         super.onResume();
         isPlayServicesAvailable(this);
-
-        // Within {@code onPause()}, we pause location updates, but leave the
-        // connection to GoogleApiClient intact.  Here, we resume receiving
-        // location updates if the user has requested them.
 
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates)
         {
@@ -737,12 +747,4 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Goo
         // onConnectionFailed.
         Log.i(TAG, "Connection failed: ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
     }
-
-   /* public void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY, mRequestingLocationUpdates);
-        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putString(LAST_UPDATED_TIME_STRING_KEY, mLastUpdateTime);
-        super.onSaveInstanceState(savedInstanceState);
-    }*/
 }

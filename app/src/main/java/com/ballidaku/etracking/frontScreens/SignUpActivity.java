@@ -3,15 +3,10 @@ package com.ballidaku.etracking.frontScreens;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,12 +19,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
+import com.ballidaku.etracking.commonClasses.CompressImageVideo;
 import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
@@ -80,7 +75,7 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
     boolean isImageClicked;
 
     //Bitmap photo;
-    String imagePath="";
+    String imagePath = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -158,10 +153,6 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
         findViewById(R.id.textViewSignUp).setOnClickListener(this);
 
         imageViewProfile.setOnClickListener(this);
-
-        // spinnerUserType.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerUserType));
-        //spinnerRange.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerRange));
-        //spinnerBlock.setOnItemSelectedListener( CommonMethods.getInstance().new OnSpinnerItemSelected(spinnerBlock));
 
 
         ArrayAdapter<String> rangeAdapter = new ArrayAdapter<String>(context, R.layout.spinner_item_view, getResources().getStringArray(R.array.rangeName));
@@ -411,24 +402,21 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
             CommonMethods.getInstance().hideKeypad(this);
 
 
-
-
-
-            if(!imagePath.isEmpty())
+            if (!imagePath.isEmpty())
             {
-                MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new onImageUpload()
+                MyFirebase.getInstance().saveImage(context, imagePath, MyConstant.USER_IMAGE, new Interfaces.onImageUpload()
                 {
                     @Override
                     public void imagePathAfterUpload(String path)
                     {
-                        createUser(email, password, name, phoneNumber,imagePath);
+                        createUser(email, password, name, phoneNumber, imagePath);
                     }
                 });
             }
             else
             {
                 CommonDialogs.getInstance().progressDialog(context);
-                createUser(email, password, name, phoneNumber,"");
+                createUser(email, password, name, phoneNumber, "");
             }
         }
 
@@ -436,10 +424,7 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
     }
 
 
-    public interface onImageUpload
-    {
-        void imagePathAfterUpload(String path);
-    }
+
 
 
     void createUser(final String email, String password, final String name, final String phoneNumber, final String firebaseImagePath)
@@ -518,107 +503,38 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
     @Override
     public void onPermissionGranted(int requestCode)
     {
-        Log.e(TAG, "onPermissionGranted " + requestCode);
         if (requestCode == 54)
         {
-            selectImage();
+            CommonDialogs.getInstance().selectImageDialog(context, null);
         }
     }
-
-
-    private void selectImage()
-    {
-        try
-        {
-            PackageManager pm = getPackageManager();
-            int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, getPackageName());
-            if (hasPerm == PackageManager.PERMISSION_GRANTED)
-            {
-                final CharSequence[] options = {"Take Photo", "Choose From Gallery", "Cancel"};
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
-                builder.setTitle("Select Option");
-                builder.setItems(options, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int item)
-                    {
-                        if (options[item].equals("Take Photo"))
-                        {
-                            dialog.dismiss();
-                            capture();
-                        }
-                        else if (options[item].equals("Choose From Gallery"))
-                        {
-                            dialog.dismiss();
-                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                            startActivityForResult(pickPhoto, PICK_IMAGE_GALLERY);
-                        }
-                        else if (options[item].equals("Cancel"))
-                        {
-                            dialog.dismiss();
-                        }
-                    }
-                });
-                builder.show();
-            }
-            else
-                Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(this, "Camera Permission error", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-
-    void capture()
-    {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        intent.putExtra(MediaStore.EXTRA_OUTPUT, CommonMethods.getInstance().getTempraryImageFile());
-
-        Uri apkURI = FileProvider.getUriForFile(
-                context,
-                context.getApplicationContext()
-                        .getPackageName() + ".provider", CommonMethods.getInstance().getTempraryImageFile2());
-
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
-
-        startActivityForResult(intent, CAMERA_REQUEST);
-    }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        if (resultCode != -1)
+            return;
+
         switch (requestCode)
         {
-            case CAMERA_REQUEST:
+            case MyConstant.CAMERA_REQUEST:
 
                 if (resultCode == Activity.RESULT_OK)
                 {
                     isImageClicked = true;
+                    String imagePathTemp = CompressImageVideo.getInstance().getTempraryImageUri(context).toString();
 
-
-//                    imagePath = CompressionClass.getInstance().compressImage(context, CommonMethods.getInstance().getTempraryImageFile());
-                    imagePath = CommonMethods.getInstance().getTempraryImageFile().toString();
-
-                    // start cropping activity for pre-acquired image saved on the device
-                    CropImage.activity(Uri.parse("file://" + imagePath))
+                    CropImage.activity(Uri.parse("file://" + imagePathTemp))
                             .setAspectRatio(1, 1)
                             .start(this);
                 }
                 break;
 
 
-            case PICK_IMAGE_GALLERY:
+            case MyConstant.PICK_IMAGE_GALLERY:
 
                 Uri selectedImage = data.getData();
-
-                imagePath = getRealPathFromURI(selectedImage);
-
-
-                CropImage.activity(Uri.parse("file://" + imagePath))
+                CropImage.activity(selectedImage)
                         .setAspectRatio(1, 1)
                         .start(this);
 
@@ -631,26 +547,18 @@ public class SignUpActivity extends AbsRuntimeMarshmallowPermission implements V
                 {
                     Uri resultUri = result.getUri();
 
-                    imageViewProfile.setImageURI(resultUri);
+                    imagePath = CompressImageVideo.getInstance().getRealPathFromURI(context, resultUri);
+
+                    CommonMethods.getInstance().showImageGlide(context, imageViewProfile, imagePath);
                 }
                 else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE)
                 {
-                    Exception error = result.getError();
+                    CommonMethods.getInstance().showToast(context, result.getError().toString());
                 }
 
                 break;
 
         }
-    }
-
-
-    public String getRealPathFromURI(Uri contentUri)
-    {
-        String[] proj = {MediaStore.Audio.Media.DATA};
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
     }
 
 }

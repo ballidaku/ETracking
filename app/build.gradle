@@ -68,6 +68,7 @@ dependencies {
     }
 
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.0'
+    implementation project(path: ':ffmpeg4android_lib')
 }
 
 apply plugin: 'com.google.gms.google-services'

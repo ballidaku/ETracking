@@ -3,7 +3,10 @@ package com.ballidaku.etracking.commonClasses;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -12,8 +15,8 @@ import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
+import com.ballidaku.etracking.dataModels.VideoDataModel;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
-import com.ballidaku.etracking.frontScreens.SignUpActivity;
 import com.ballidaku.etracking.mainScreens.ProfileActivity;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 import com.ballidaku.etracking.mainScreens.beatScreens.BeatActivity;
@@ -32,6 +35,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,7 +43,7 @@ import java.util.HashMap;
 /**
  * Created by sharanpalsingh on 05/03/17.
  */
-public class MyFirebase<T>
+public class MyFirebase<Z,T>
 {
 
     private String TAG = MyFirebase.class.getSimpleName();
@@ -86,14 +90,14 @@ public class MyFirebase<T>
 
                 dismissDialog();
 
-                if(task.isSuccessful())
+                if (task.isSuccessful())
                 {
                     onCompleteListener.onComplete();
-                    CommonMethods.getInstance().show_Toast(context, "User updated successfully");
+                    CommonMethods.getInstance().showToast(context, "User updated successfully");
                 }
                 else
                 {
-                    CommonMethods.getInstance().show_Toast(context, "Please try again");
+                    CommonMethods.getInstance().showToast(context, "Please try again");
                 }
             }
         });
@@ -138,7 +142,7 @@ public class MyFirebase<T>
                 {
                     //openActivity(context, userID, userType, result);
                     openLogin(context);
-                    CommonMethods.getInstance().show_Toast(context, "User created successfully");
+                    CommonMethods.getInstance().showToast(context, "User created successfully");
                 }
             }
         });
@@ -187,7 +191,7 @@ public class MyFirebase<T>
                                 else
                                 {
                                     dismissDialog();
-                                    CommonMethods.getInstance().show_Toast(context, "Contact DFO for permission to login");
+                                    CommonMethods.getInstance().showToast(context, "Contact DFO for permission to login");
                                 }
 
                             }
@@ -289,21 +293,24 @@ public class MyFirebase<T>
     //**********************************************************************************************
     //**********************************************************************************************
 
-    public void saveImage(final Context context, String imagePath, final String imageOffence, final T data)
+    public void saveImage(final Context context, final Z imagePath, final String imageOffence, final T data)
     {
-
+        if(!imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
         showDialog(context);
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
-        // Create a storage reference from our app
         StorageReference storageRef = storage.getReference();
 
-        // Points to "images"
-        StorageReference mountainImagesRef;
+        final StorageReference mountainImagesRef;
+
         if (imageOffence.equals(MyConstant.USER_IMAGE))
         {
             mountainImagesRef = storageRef.child("profile_images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
+        }
+        else if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+        {
+            mountainImagesRef = storageRef.child("video_thumbnails/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
         }
         else
         {
@@ -311,7 +318,21 @@ public class MyFirebase<T>
         }
 
 
-        UploadTask uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + imagePath));
+        UploadTask uploadTask;
+        if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+        {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ((Bitmap)imagePath).compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] bitmapByte = baos.toByteArray();
+
+             uploadTask = mountainImagesRef.putBytes(bitmapByte);
+        }
+        else
+        {
+            uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + imagePath));
+        }
+
+
         uploadTask.addOnFailureListener(new OnFailureListener()
         {
             @Override
@@ -329,26 +350,107 @@ public class MyFirebase<T>
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
             {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                String downloadUrl = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
-
-                Log.e(TAG, "ImagePath " + downloadUrl);
-
-                CommonMethods.getInstance().deleteTempraryImage();
-                CompressionClass.getInstance().deleteDirctory();
-
-                if (imageOffence.equals(MyConstant.IMAGE))
+                mountainImagesRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>()
                 {
-                    reportImage(context, downloadUrl);
-                }
-                else if (imageOffence.equals(MyConstant.OFFENCE))
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task)
+                    {
+                        String downloadUrl = task.getResult().toString();
+
+                        Log.e(TAG, "ImagePath " + downloadUrl);
+
+                        CompressImageVideo.getInstance().deleteTempraryImageDirectory(context);
+
+                        if (imageOffence.equals(MyConstant.IMAGE))
+                        {
+                            reportImage(context, downloadUrl);
+                        }
+                        else if (imageOffence.equals(MyConstant.OFFENCE))
+                        {
+                            reportOffence(context, downloadUrl, (HashMap<String, Object>) data);
+                        }
+                        else if (imageOffence.equals(MyConstant.USER_IMAGE))
+                        {
+                            ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
+                        }
+                        else if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+                        {
+                            ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
+                        }
+                    }
+                });
+
+
+            }
+        });
+    }
+
+    /**
+     * API for creating thumbnail from Video
+     * @param filePath - video file path
+     * @param type - size MediaStore.Images.Thumbnails.MINI_KIND or MICRO_KIND
+     * @return thumbnail bitmap
+     */
+    public Bitmap createThumbnailFromPath(String filePath, int type){
+        return ThumbnailUtils.createVideoThumbnail(filePath, type);
+    }
+
+    public void saveVideo(final Context context, String videoPath)
+    {
+        showDialog(context);
+
+        final Bitmap bitmap = createThumbnailFromPath(videoPath, MediaStore.Images.Thumbnails.MINI_KIND);
+
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        StorageReference storageRef = storage.getReference();
+
+        final StorageReference mountainImagesRef = storageRef.child("reported_videos/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".mp4");
+
+
+        UploadTask uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + videoPath));
+        uploadTask.addOnFailureListener(new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception exception)
+            {
+                // Handle unsuccessful uploads
+
+                exception.printStackTrace();
+                dismissDialog();
+
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+        {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+            {
+                //Getting url of video
+                mountainImagesRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>()
                 {
-                    reportOffence(context, downloadUrl, (HashMap<String, Object>) data);
-                }
-                else if (imageOffence.equals(MyConstant.USER_IMAGE))
-                {
-                    ((SignUpActivity.onImageUpload) data).imagePathAfterUpload(downloadUrl);
-                }
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task)
+                    {
+                        final String downloadVideoUrl = task.getResult().toString();
+
+                        CompressImageVideo.getInstance().deleteTempraryVideoDirectory(context);
+
+                        saveImage(context, (Z)bitmap, MyConstant.VIDEO_THUMBNAIL,(T) new Interfaces.onImageUpload()
+                        {
+                            @Override
+                            public void imagePathAfterUpload(String path)
+                            {
+                                reportVideo(context, downloadVideoUrl,path);
+                            }
+                        });
+
+
+                    }
+                });
+
+
             }
         });
     }
@@ -370,7 +472,7 @@ public class MyFirebase<T>
             {
                 if (task.isSuccessful())
                 {
-                    CommonMethods.getInstance().show_Toast(context, "Offence reported successfully");
+                    CommonMethods.getInstance().showToast(context, "Offence reported successfully");
 
                     ((ReportOffenceActivity) context).finish();
                 }
@@ -380,7 +482,7 @@ public class MyFirebase<T>
     }
 
 
-    public void reportImage(final Context context, String path)
+    private void reportImage(final Context context, String path)
     {
         HashMap<String, Object> hashMap = new HashMap<String, Object>();
         hashMap.put(MyConstant.IMAGE_PATH, path);
@@ -396,7 +498,31 @@ public class MyFirebase<T>
             {
                 if (task.isSuccessful())
                 {
-                    CommonMethods.getInstance().show_Toast(context, "Image reported successfully");
+                    CommonMethods.getInstance().showToast(context, "Image reported successfully");
+                }
+
+                dismissDialog();
+            }
+        });
+    }
+
+    private void reportVideo(final Context context, String path,String thumbnailPath)
+    {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put(MyConstant.VIDEO_PATH, path);
+        hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
+        hashMap.put(MyConstant.VIDEO_THUMBNAIL, thumbnailPath);
+
+
+        final String userID = MySharedPreference.getInstance().getUserID(context);
+        root.child(MyConstant.REPORTED_VIDEOS).child(userID).push().updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                if (task.isSuccessful())
+                {
+                    CommonMethods.getInstance().showToast(context, "Video reported successfully");
                 }
 
                 dismissDialog();
@@ -441,6 +567,41 @@ public class MyFirebase<T>
 
                 Collections.reverse(arrayList);
                 reportedImagesListener.callback(arrayList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+
+            }
+        });
+    }
+
+    public void getFirebaseVideos(Context context, final Interfaces.ReportedVideosListener reportedVideosListener)
+    {
+
+        String userId = MySharedPreference.getInstance().getUserID(context);
+
+        root.child(MyConstant.REPORTED_VIDEOS).child(userId).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                ArrayList<VideoDataModel> arrayList = new ArrayList<>();
+                for (final DataSnapshot child1 : dataSnapshot.getChildren())
+                {
+                    //Log.e(TAG, ""+child1.getValue());
+
+                    VideoDataModel videoDataModel=new VideoDataModel();
+                    videoDataModel.setVideoPath((String) child1.child(MyConstant.VIDEO_PATH).getValue());
+                    videoDataModel.setReportedTime(CommonMethods.getInstance().convertTimeStampToDateTime((long) child1.child(MyConstant.REPORTED_TIME).getValue()));
+                    videoDataModel.setVideoThumbnailPath((String) child1.child(MyConstant.VIDEO_THUMBNAIL).getValue());
+
+                    arrayList.add(videoDataModel);
+                }
+
+                Collections.reverse(arrayList);
+                reportedVideosListener.callback(arrayList);
             }
 
             @Override
@@ -648,7 +809,7 @@ public class MyFirebase<T>
                     beatDataModel.setBeatBeat((String) child.child(MyConstant.BEAT).getValue());
                     beatDataModel.setBeatHeadquater((String) child.child(MyConstant.HEADQUATER).getValue());
 
-                    if(child.hasChild(MyConstant.USER_PHOTO))
+                    if (child.hasChild(MyConstant.USER_PHOTO))
                     {
                         beatDataModel.setBeatPhoto((String) child.child(MyConstant.USER_PHOTO).getValue());
                     }
@@ -872,7 +1033,7 @@ public class MyFirebase<T>
                 }
                 else
                 {
-                    CommonMethods.show_Toast(context, "User Name already exists");
+                    CommonMethods.showToast(context, "User Name already exists");
                 }
 
                 Log.e(TAG, "CHILD there     " + isChildThere);
@@ -912,7 +1073,7 @@ public class MyFirebase<T>
                     {
                         MySharedPreference.getInstance().saveUser(context, child.getKey(), userDataModel.getUser_name(),map.get(MyConstant.PASSWORD));
 
-                        CommonMethods.show_Toast(context, "Login successfull");
+                        CommonMethods.showToast(context, "Login successfull");
 //
                         context.startActivity(new Intent(context, MainActivity.class));
 
@@ -920,7 +1081,7 @@ public class MyFirebase<T>
                     }
                     else
                     {
-                        CommonMethods.show_Toast(context, "Password did not match");
+                        CommonMethods.showToast(context, "Password did not match");
                     }
 
 
@@ -928,7 +1089,7 @@ public class MyFirebase<T>
 
                 if (!isChildThere)
                 {
-                    CommonMethods.show_Toast(context, "User Name does not exists");
+                    CommonMethods.showToast(context, "User Name does not exists");
                 }
                 Log.e(TAG, "CHILD there     " + isChildThere);
             }

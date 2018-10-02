@@ -12,11 +12,12 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -34,7 +35,6 @@ import com.ballidaku.etracking.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -64,10 +64,10 @@ public class CommonMethods
     }
 
 
-    public Toast toast;
-    public Snackbar snackbar;
+    private Toast toast;
+    private Snackbar snackbar;
 
-    public void show_Toast(Context context, String text)
+    public void showToast(Context context, String text)
     {
         if (toast != null)
         {
@@ -100,37 +100,13 @@ public class CommonMethods
 
     public boolean isValidEmail(CharSequence target)
     {
-        if (target == null)
-        {
-            return false;
-        }
-        else
-        {
-            return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
-        }
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
 
     public boolean isValidMobile(String phone)
     {
-        boolean check = false;
-        if (!Pattern.matches("[a-zA-Z]+", phone))
-        {
-//            if(phone.length() < 6 || phone.length() > 13) {
-            if (phone.length() != 10)
-            {
-                check = false;
-            }
-            else
-            {
-                check = true;
-            }
-        }
-        else
-        {
-            check = false;
-        }
-        return check;
+        return  !Pattern.matches("[a-zA-Z]+", phone) && phone.length() == 10;
     }
 
 
@@ -228,44 +204,12 @@ public class CommonMethods
 
         o2.inSampleSize = scale;
 
-        Bitmap bitmap = BitmapFactory.decodeStream(context.getContentResolver().openInputStream(selectedImage), null, o2);
-
-        return bitmap;
-    }
-
-
-    public Uri getTempraryImageFile()
-    {
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "IMG_Temp.jpg");
-
-        Log.e(TAG, "Path " + outputFile.toString());
-        return Uri.fromFile(outputFile);
-    }
-
-    public File getTempraryImageFile2()
-    {
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "IMG_Temp.jpg");
-
-        Log.e(TAG, "Path " + outputFile.toString());
-        return outputFile;
-    }
-
-    public void deleteTempraryImage()
-    {
-        File outputFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "IMG_Temp.jpg");
-
-        deleteRecursive(outputFile);
+       return BitmapFactory.decodeStream(context.getContentResolver().openInputStream(selectedImage), null, o2);
 
     }
 
-    void deleteRecursive(File fileOrDirectory)
-    {
-        if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
-                deleteRecursive(child);
 
-        fileOrDirectory.delete();
-    }
+
 
     /**
      * Converting dp to pixel
@@ -668,50 +612,37 @@ public class CommonMethods
     }
 
 
+    //**********************************************************************************************
+    //**********************************************************************************************
 
-
-
-
-
-
-   /* public String encrypt(Context context, String message)
+    public void capture(Context context, Fragment fragment)
     {
-       return encrypt(message,MySharedPreference.getInstance().getPassword(context));
-    }
-    public String encrypt(String message,String password)
-    {
-        String encryptedMsg = "";
-        try
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri apkURI = FileProvider.getUriForFile(
+                context,
+                context.getApplicationContext()
+                        .getPackageName() + ".provider", CompressImageVideo.getInstance().getTempraryImageFile(context));
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, apkURI);
+
+        /*if (fragment!=null && fragment instanceof AddCustomerFragment)
         {
-            encryptedMsg = AESCrypt.encrypt(password, message);
-        } catch (GeneralSecurityException e)
-        {
-            //handle error
+            fragment.startActivityForResult(intent, MyConstant.CAMERA_REQUEST);
         }
-
-        return encryptedMsg;
-    }*/
-
-
-  /*  public String decrypt(Context context, String message)
-    {
-        return decrypt(message,MySharedPreference.getInstance().getPassword(context));
+        else
+        {*/
+            ((Activity) context).startActivityForResult(intent, MyConstant.CAMERA_REQUEST);
+//        }
     }
 
-    public String decrypt(String encryptedMsg,String password)
-    {
-        String messageAfterDecrypt = "";
 
-        try
-        {
-            messageAfterDecrypt = AESCrypt.decrypt(password, encryptedMsg);
-        } catch (GeneralSecurityException e)
-        {
-            //handle error - could be due to incorrect password or tampered encryptedMsg
-        }
 
-        return messageAfterDecrypt;
-    }*/
+
+
+
+
+
+
 
 
 }

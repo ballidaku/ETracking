@@ -1,11 +1,18 @@
 package com.ballidaku.etracking.commonClasses;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -219,4 +226,60 @@ public class CommonDialogs
         });
         dialog.setCanceledOnTouchOutside(true);
     }
+
+
+    public void selectImageDialog(final Context context, final Fragment fragment)
+    {
+        try
+        {
+            PackageManager pm = context.getPackageManager();
+            int hasPerm = pm.checkPermission(Manifest.permission.CAMERA, context.getPackageName());
+            if (hasPerm == PackageManager.PERMISSION_GRANTED)
+            {
+                final CharSequence[] options = {context.getString(R.string.take_photo), context.getString(R.string.choose_from_gallery), context.getString(R.string.cancel)};
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+                builder.setTitle(context.getString(R.string.select_option));
+                builder.setItems(options, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int item)
+                    {
+                        if (options[item].equals(context.getString(R.string.take_photo)))
+                        {
+                            dialog.dismiss();
+                            CommonMethods.getInstance().capture(context, fragment);
+                        }
+                        else if (options[item].equals(context.getString(R.string.choose_from_gallery)))
+                        {
+                            dialog.dismiss();
+
+                            Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                           /* if (fragment != null && fragment instanceof AddCustomerFragment)
+                            {
+                                // fragment.startActivityForResult(pickPhoto, MyConstant.PICK_IMAGE_GALLERY);
+                                selectImageFileDialog(context,fragment);
+                            }
+                            else
+                            {*/
+                                ((Activity) context).startActivityForResult(pickPhoto, MyConstant.PICK_IMAGE_GALLERY);
+//                            }
+                        }
+                        else if (options[item].equals(context.getString(R.string.cancel)))
+                        {
+                            dialog.dismiss();
+                        }
+                    }
+                });
+                builder.show();
+            }
+            else
+                CommonMethods.getInstance().showToast(context, context.getString(R.string.camera_permission_error));
+        }
+        catch (Exception e)
+        {
+            CommonMethods.getInstance().showToast(context, context.getString(R.string.camera_permission_error));
+            e.printStackTrace();
+        }
+    }
+
 }
