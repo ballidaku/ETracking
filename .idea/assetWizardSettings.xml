@@ -45,7 +45,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="color" value="ffffff" />
+                                                <entry key="color" value="5a354b" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -56,7 +56,8 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="text" value="SAVE" />
+                                                <entry key="fontFamily" value="Marker Felt" />
+                                                <entry key="text" value="Loading..." />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -67,10 +68,10 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="TEXT" />
-                                      <entry key="backgroundColor" value="fefefe" />
+                                      <entry key="backgroundColor" value="929292" />
                                       <entry key="iconShape" value="NONE" />
                                       <entry key="imageAsset" value="$PROJECT_DIR$/../user-placeholder.jpg" />
-                                      <entry key="outputName" value="ic_save" />
+                                      <entry key="outputName" value="ic_placeholder_loading" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -89,6 +90,11 @@
                 </map>
               </option>
             </PersistentState>
+          </value>
+        </entry>
+        <entry key="vectorWizard">
+          <value>
+            <PersistentState />
           </value>
         </entry>
       </map>

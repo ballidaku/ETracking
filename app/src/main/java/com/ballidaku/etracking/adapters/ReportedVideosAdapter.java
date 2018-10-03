@@ -72,7 +72,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
         String[] dateTime = videoDataModelArrayList.get(position).getReportedTime().split(" ");
 
 
-        CommonMethods.getInstance().showImageGlide(context, holder.imageViewReported, imageUrl);
+        CommonMethods.getInstance().showImageGlide2(context, holder.imageViewReported, imageUrl);
 
 
         String reportedBy = videoDataModelArrayList.get(position).getReportedBy();
@@ -161,6 +161,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
                 public void onClick(View v)
                 {
                     String videoPath = videoDataModelArrayList.get(getAdapterPosition()).getVideoPath();
+
 
 
                     if (videoPath != null)

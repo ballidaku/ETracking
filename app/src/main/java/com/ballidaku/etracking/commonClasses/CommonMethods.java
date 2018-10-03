@@ -114,8 +114,16 @@ public class CommonMethods
     {
         Glide.with(context)
              .load(path)
-             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_user_placeholder).error(R.mipmap.ic_user_placeholder))
+             .apply(new RequestOptions().centerCrop().placeholder(R.drawable.ic_placeholder_loading).error(R.drawable.ic_placeholder_image_not_available))
              .into(imageView);
+    }
+
+    public void showImageGlide2(Context context, ImageView imageView, String path)
+    {
+        Glide.with(context)
+                .load(path)
+                .apply(new RequestOptions().centerCrop().placeholder(R.drawable.ic_placeholder_loading).error(R.drawable.ic_placeholder_video_not_available).centerCrop())
+                .into(imageView);
     }
 
     /*public void showImageGlide2(Context context, final ZoomableImageView zoomableImageView, String path)
