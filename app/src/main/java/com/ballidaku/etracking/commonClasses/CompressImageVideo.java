@@ -492,6 +492,16 @@ public class CompressImageVideo
         return file;
     }
 
+    public File getDownloadVideoDirectoryPath(Context context)
+    {
+        File file = new File(Environment.getExternalStorageDirectory().getPath(), context.getString(R.string.app_name)+"/DownloadedVideos");
+        if (!file.exists())
+        {
+            file.mkdirs();
+        }
+        return file;
+    }
+
     private File getVideoName(Context context)
     {
         return new File(getTempraryVideoDirectoryPath(context).getAbsolutePath() + "/" + System.currentTimeMillis() + ".mp4");

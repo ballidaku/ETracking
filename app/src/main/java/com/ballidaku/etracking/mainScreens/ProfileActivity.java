@@ -212,7 +212,7 @@ public class ProfileActivity extends AbsRuntimeMarshmallowPermission implements 
                 @Override
                 public void imagePathAfterUpload(String path)
                 {
-                    updateData(name, phoneNumber, imagePath);
+                    updateData(name, phoneNumber, path);
                 }
             });
         }

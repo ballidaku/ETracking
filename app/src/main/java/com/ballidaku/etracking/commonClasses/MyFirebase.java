@@ -14,6 +14,7 @@ import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
+import com.ballidaku.etracking.dataModels.NotificationModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
 import com.ballidaku.etracking.dataModels.VideoDataModel;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
@@ -43,7 +44,7 @@ import java.util.HashMap;
 /**
  * Created by sharanpalsingh on 05/03/17.
  */
-public class MyFirebase<Z,T>
+public class MyFirebase<Z, T>
 {
 
     private String TAG = MyFirebase.class.getSimpleName();
@@ -56,20 +57,6 @@ public class MyFirebase<Z,T>
     public static MyFirebase getInstance()
     {
         return instance;
-    }
-
-
-    private void showDialog(Context context)
-    {
-        CommonDialogs.getInstance().progressDialog(context);
-    }
-
-    private void dismissDialog()
-    {
-        if (CommonDialogs.getInstance().dialog.isShowing())
-        {
-            CommonDialogs.getInstance().dialog.dismiss();
-        }
     }
 
 
@@ -88,7 +75,7 @@ public class MyFirebase<Z,T>
             public void onComplete(@NonNull Task<Void> task)
             {
 
-                dismissDialog();
+                CommonDialogs.getInstance().dismissDialog();
 
                 if (task.isSuccessful())
                 {
@@ -103,6 +90,115 @@ public class MyFirebase<Z,T>
         });
 
 
+    }
+
+    public void createNotification(final Context context, String text, final Interfaces.OnMessageUpdateListener onMessageUpdateListener)
+    {
+        CommonDialogs.getInstance().progressDialog(context);
+        String userID = MySharedPreference.getInstance().getUserID(context);
+        String userEmail = MySharedPreference.getInstance().getUserEmail(context);
+        String userType = MySharedPreference.getInstance().getUserType(context);
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put(MyConstant.NOTIFICATION_TEXT, text);
+        hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
+        hashMap.put(MyConstant.USER_EMAIL, userEmail);
+        hashMap.put(MyConstant.USER_ID, userID);
+        hashMap.put(MyConstant.USER_TYPE, userType);
+
+        String key = root.child(MyConstant.NOTIFICATIONS).push().getKey();
+
+        root.child(MyConstant.NOTIFICATIONS).child(key).updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                CommonDialogs.getInstance().dismissDialog();
+
+                if (task.isSuccessful())
+                {
+                    CommonMethods.getInstance().showToast(context, "Notification successfully posted.");
+                    onMessageUpdateListener.onUpdated();
+
+                }
+            }
+        });
+    }
+
+    ArrayList<NotificationModel> notificationModelArrayList;
+
+    public void getAllNotifications(Context context, boolean b, final Interfaces.GetNotificationListener getNotificationListener)
+    {
+        if(b)
+        CommonDialogs.getInstance().progressDialog(context);
+
+        root.child(MyConstant.NOTIFICATIONS).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshotMain)
+            {
+                notificationModelArrayList = new ArrayList<>();
+
+                final int size = (int) dataSnapshotMain.getChildrenCount();
+                if (size == 0)
+                {
+                    CommonDialogs.getInstance().dismissDialog();
+                }
+
+                for (final DataSnapshot childNotification : dataSnapshotMain.getChildren())
+                {
+                    Log.e(TAG, childNotification.getKey());
+
+                    final String email = (String) childNotification.child(MyConstant.USER_EMAIL).getValue();
+                    final String userType = (String) childNotification.child(MyConstant.USER_TYPE).getValue();
+
+                    root.child(MyConstant.USERS).child(userType).orderByChild(MyConstant.USER_EMAIL).equalTo(email).addListenerForSingleValueEvent(new ValueEventListener()
+                    {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot2)
+                        {
+                            final int size2 = (int) dataSnapshot2.getChildrenCount();
+
+                            for (DataSnapshot child2 : dataSnapshot2.getChildren())
+                            {
+                                Log.e(TAG, "User Key " + child2.getKey());
+
+                                NotificationModel notificationModel = new NotificationModel();
+                                notificationModel.setNotification((String) childNotification.child(MyConstant.NOTIFICATION_TEXT).getValue());
+                                notificationModel.setNotificationDateTime(CommonMethods.getInstance().convertTimeStampToDateTime2((long)childNotification.child(MyConstant.REPORTED_TIME).getValue()));
+                                notificationModel.setSenderId(child2.getKey());
+                                notificationModel.setSenderName((String) child2.child(MyConstant.USER_NAME).getValue());
+
+                                notificationModelArrayList.add(notificationModel);
+
+                                if (notificationModelArrayList.size() == size)
+                                {
+                                    CommonDialogs.getInstance().dismissDialog();
+                                    Collections.reverse(notificationModelArrayList);
+                                    getNotificationListener.callback(notificationModelArrayList);
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError)
+                        {
+                            Log.e(TAG, "ERROR     " + databaseError.getMessage());
+                            CommonDialogs.getInstance().dismissDialog();
+                        }
+                    });
+
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+                CommonDialogs.getInstance().dismissDialog();
+            }
+        });
     }
 
 
@@ -190,7 +286,7 @@ public class MyFirebase<Z,T>
                                 }
                                 else
                                 {
-                                    dismissDialog();
+                                    CommonDialogs.getInstance().dismissDialog();
                                     CommonMethods.getInstance().showToast(context, "Contact DFO for permission to login");
                                 }
 
@@ -220,7 +316,7 @@ public class MyFirebase<Z,T>
     private void openActivity(Context context, String userID, String userType, HashMap<String, Object> result)
     {
 
-        dismissDialog();
+        CommonDialogs.getInstance().dismissDialog();
 
         MySharedPreference.getInstance().saveUser(context, userID, userType, result);
 
@@ -295,8 +391,8 @@ public class MyFirebase<Z,T>
 
     public void saveImage(final Context context, final Z imagePath, final String imageOffence, final T data)
     {
-        if(!imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
-        showDialog(context);
+        if (!imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+            CommonDialogs.getInstance().progressDialog(context);
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -308,7 +404,7 @@ public class MyFirebase<Z,T>
         {
             mountainImagesRef = storageRef.child("profile_images/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
         }
-        else if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+        else if (imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
         {
             mountainImagesRef = storageRef.child("video_thumbnails/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".jpg");
         }
@@ -319,13 +415,13 @@ public class MyFirebase<Z,T>
 
 
         UploadTask uploadTask;
-        if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+        if (imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
         {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ((Bitmap)imagePath).compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            ((Bitmap) imagePath).compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] bitmapByte = baos.toByteArray();
 
-             uploadTask = mountainImagesRef.putBytes(bitmapByte);
+            uploadTask = mountainImagesRef.putBytes(bitmapByte);
         }
         else
         {
@@ -341,7 +437,7 @@ public class MyFirebase<Z,T>
                 // Handle unsuccessful uploads
 
                 exception.printStackTrace();
-                dismissDialog();
+                CommonDialogs.getInstance().dismissDialog();
 
 
             }
@@ -373,7 +469,7 @@ public class MyFirebase<Z,T>
                         {
                             ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
                         }
-                        else if(imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+                        else if (imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
                         {
                             ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
                         }
@@ -387,17 +483,19 @@ public class MyFirebase<Z,T>
 
     /**
      * API for creating thumbnail from Video
+     *
      * @param filePath - video file path
-     * @param type - size MediaStore.Images.Thumbnails.MINI_KIND or MICRO_KIND
+     * @param type     - size MediaStore.Images.Thumbnails.MINI_KIND or MICRO_KIND
      * @return thumbnail bitmap
      */
-    public Bitmap createThumbnailFromPath(String filePath, int type){
+    public Bitmap createThumbnailFromPath(String filePath, int type)
+    {
         return ThumbnailUtils.createVideoThumbnail(filePath, type);
     }
 
     public void saveVideo(final Context context, String videoPath)
     {
-        showDialog(context);
+        CommonDialogs.getInstance().showProgressDialog(context, "Video Uploading Please Wait...");
 
         final Bitmap bitmap = createThumbnailFromPath(videoPath, MediaStore.Images.Thumbnails.MINI_KIND);
 
@@ -406,7 +504,9 @@ public class MyFirebase<Z,T>
 
         StorageReference storageRef = storage.getReference();
 
-        final StorageReference mountainImagesRef = storageRef.child("reported_videos/" + CommonMethods.getInstance().getCurrentDateTimeForName() + ".mp4");
+        final String videoName = CommonMethods.getInstance().getCurrentDateTimeForName() + ".mp4";
+
+        final StorageReference mountainImagesRef = storageRef.child("reported_videos/" + videoName);
 
 
         UploadTask uploadTask = mountainImagesRef.putFile(Uri.parse("file://" + videoPath));
@@ -415,12 +515,8 @@ public class MyFirebase<Z,T>
             @Override
             public void onFailure(@NonNull Exception exception)
             {
-                // Handle unsuccessful uploads
-
                 exception.printStackTrace();
-                dismissDialog();
-
-
+                CommonDialogs.getInstance().dismissDialog();
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
         {
@@ -433,16 +529,16 @@ public class MyFirebase<Z,T>
                     @Override
                     public void onComplete(@NonNull Task<Uri> task)
                     {
-                        final String downloadVideoUrl = task.getResult().toString();
+                        final String videoUrl = task.getResult().toString();
 
                         CompressImageVideo.getInstance().deleteTempraryVideoDirectory(context);
 
-                        saveImage(context, (Z)bitmap, MyConstant.VIDEO_THUMBNAIL,(T) new Interfaces.onImageUpload()
+                        saveImage(context, (Z) bitmap, MyConstant.VIDEO_THUMBNAIL, (T) new Interfaces.onImageUpload()
                         {
                             @Override
-                            public void imagePathAfterUpload(String path)
+                            public void imagePathAfterUpload(String videoThumbnailPath)
                             {
-                                reportVideo(context, downloadVideoUrl,path);
+                                reportVideo(context, videoUrl, videoThumbnailPath, videoName);
                             }
                         });
 
@@ -476,7 +572,7 @@ public class MyFirebase<Z,T>
 
                     ((ReportOffenceActivity) context).finish();
                 }
-                dismissDialog();
+                CommonDialogs.getInstance().dismissDialog();
             }
         });
     }
@@ -501,17 +597,18 @@ public class MyFirebase<Z,T>
                     CommonMethods.getInstance().showToast(context, "Image reported successfully");
                 }
 
-                dismissDialog();
+                CommonDialogs.getInstance().dismissDialog();
             }
         });
     }
 
-    private void reportVideo(final Context context, String path,String thumbnailPath)
+    private void reportVideo(final Context context, String videoUrl, String videoThumbnailPath, String videoName)
     {
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(MyConstant.VIDEO_PATH, path);
+        hashMap.put(MyConstant.VIDEO_PATH, videoUrl);
         hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
-        hashMap.put(MyConstant.VIDEO_THUMBNAIL, thumbnailPath);
+        hashMap.put(MyConstant.VIDEO_THUMBNAIL, videoThumbnailPath);
+        hashMap.put(MyConstant.VIDEO_NAME, videoName);
 
 
         final String userID = MySharedPreference.getInstance().getUserID(context);
@@ -525,7 +622,7 @@ public class MyFirebase<Z,T>
                     CommonMethods.getInstance().showToast(context, "Video reported successfully");
                 }
 
-                dismissDialog();
+                CommonDialogs.getInstance().dismissDialog();
             }
         });
     }
@@ -545,7 +642,7 @@ public class MyFirebase<Z,T>
         root.child(MyConstant.REPORTED_IMAGES).child(userId).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
                 ArrayList<ImageDataModel> arrayList = new ArrayList<ImageDataModel>();
                 for (final DataSnapshot child1 : dataSnapshot.getChildren())
@@ -570,7 +667,7 @@ public class MyFirebase<Z,T>
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
+            public void onCancelled(@NonNull DatabaseError databaseError)
             {
 
             }
@@ -585,15 +682,16 @@ public class MyFirebase<Z,T>
         root.child(MyConstant.REPORTED_VIDEOS).child(userId).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
                 ArrayList<VideoDataModel> arrayList = new ArrayList<>();
                 for (final DataSnapshot child1 : dataSnapshot.getChildren())
                 {
                     //Log.e(TAG, ""+child1.getValue());
 
-                    VideoDataModel videoDataModel=new VideoDataModel();
+                    VideoDataModel videoDataModel = new VideoDataModel();
                     videoDataModel.setVideoPath((String) child1.child(MyConstant.VIDEO_PATH).getValue());
+                    videoDataModel.setVideoName((String) child1.child(MyConstant.VIDEO_NAME).getValue());
                     videoDataModel.setReportedTime(CommonMethods.getInstance().convertTimeStampToDateTime((long) child1.child(MyConstant.REPORTED_TIME).getValue()));
                     videoDataModel.setVideoThumbnailPath((String) child1.child(MyConstant.VIDEO_THUMBNAIL).getValue());
 
@@ -605,7 +703,7 @@ public class MyFirebase<Z,T>
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
+            public void onCancelled(@NonNull DatabaseError databaseError)
             {
 
             }
@@ -621,7 +719,7 @@ public class MyFirebase<Z,T>
         root.child(MyConstant.REPORTED_OFFENCE).child(userId).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
                 ArrayList<OffenceDataModel> arrayList = new ArrayList<OffenceDataModel>();
                 for (final DataSnapshot child1 : dataSnapshot.getChildren())
@@ -695,6 +793,75 @@ public class MyFirebase<Z,T>
                             }
                             Collections.reverse(arrayList);
                             reportedImagesListener.callback(arrayList);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError)
+                        {
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+            }
+        });
+    }
+
+
+    public void getReportedVideosByAdmin(final Interfaces.ReportedVideosListener reportedVideosListener)
+    {
+        root.child(MyConstant.REPORTED_VIDEOS).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                final ArrayList<VideoDataModel> arrayList = new ArrayList<>();
+
+                if (dataSnapshot.getValue() == null)
+                {
+                    CommonDialogs.getInstance().dialog.dismiss();
+                    return;
+                }
+
+                for (final DataSnapshot beatIds : dataSnapshot.getChildren())
+                {
+
+                    Log.e(TAG, "beatIds.getKey() " + beatIds.getKey());
+
+                    root.child(MyConstant.USERS).child(MyConstant.BEAT).child(beatIds.getKey()).addListenerForSingleValueEvent(new ValueEventListener()
+                    {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot)
+                        {
+                            String guardName = (String) dataSnapshot.child(MyConstant.USER_NAME).getValue();
+
+                            for (final DataSnapshot child1 : beatIds.getChildren())
+                            {
+                               /* (String) keys.child(MyConstant.IMAGE_PATH).getValue(),
+                                        CommonMethods.getInstance().convertTimeStampToDateTime((long) keys.child(MyConstant.REPORTED_TIME).getValue()),
+                                        guardName,
+                                        beatIds.getKey(),
+                                        keys.getKey());
+
+                                arrayList.add(imageDataModel);*/
+
+
+                                VideoDataModel videoDataModel = new VideoDataModel();
+                                videoDataModel.setVideoPath((String) child1.child(MyConstant.VIDEO_PATH).getValue());
+                                videoDataModel.setVideoName((String) child1.child(MyConstant.VIDEO_NAME).getValue());
+                                videoDataModel.setReportedTime(CommonMethods.getInstance().convertTimeStampToDateTime((long) child1.child(MyConstant.REPORTED_TIME).getValue()));
+                                videoDataModel.setVideoThumbnailPath((String) child1.child(MyConstant.VIDEO_THUMBNAIL).getValue());
+                                videoDataModel.setReportedBy(guardName);
+                                videoDataModel.setBeatID(beatIds.getKey());
+                                videoDataModel.setReportedVideoID(child1.getKey());
+
+                                arrayList.add(videoDataModel);
+                            }
+                            Collections.reverse(arrayList);
+                            reportedVideosListener.callback(arrayList);
                         }
 
                         @Override

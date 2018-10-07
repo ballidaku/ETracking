@@ -60,11 +60,10 @@
             android:name=".mainScreens.beatScreens.ReportedImagesActivity"
             android:label=""
             android:screenOrientation="portrait"/>
-
-        <activity android:name=".mainScreens.beatScreens.ReportedVideosActivity"
-                  android:label=""
-                  android:screenOrientation="portrait"/>
-
+        <activity
+            android:name=".mainScreens.beatScreens.ReportedVideosActivity"
+            android:label=""
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".mainScreens.ProfileActivity"
             android:label=""/>
@@ -95,6 +94,9 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
 
+        <activity android:name=".mainScreens.beatScreens.NotificationActivity"
+                  android:label=""
+                  android:screenOrientation="portrait"/>
 
     </application>
 

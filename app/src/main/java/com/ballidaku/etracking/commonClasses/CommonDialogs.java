@@ -109,6 +109,29 @@ public class CommonDialogs
         dialog.show();
     }
 
+    public void showProgressDialog(Context context,String message)
+    {
+        dialog = new Dialog(context, R.style.DialogTheme);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_progress);
+        dialog.setCancelable(false);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        TextView textViewMessage= dialog.findViewById(R.id.textViewMessage);
+        textViewMessage.setText(message);
+
+        dialog.show();
+    }
+
+    public void dismissDialog()
+    {
+        if(dialog != null && dialog.isShowing())
+        {
+            dialog.dismiss();
+        }
+    }
+
 
     /*public void selectBeatDialog(Context context, ArrayList<GuardDataModel> arrayList)
     {

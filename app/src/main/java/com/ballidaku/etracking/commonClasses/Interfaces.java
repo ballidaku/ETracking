@@ -3,6 +3,7 @@ package com.ballidaku.etracking.commonClasses;
 import com.ballidaku.etracking.dataModels.GuardDataModel;
 import com.ballidaku.etracking.dataModels.BeatLocationModel;
 import com.ballidaku.etracking.dataModels.ImageDataModel;
+import com.ballidaku.etracking.dataModels.NotificationModel;
 import com.ballidaku.etracking.dataModels.OffenceDataModel;
 import com.ballidaku.etracking.dataModels.VideoDataModel;
 
@@ -50,6 +51,14 @@ public class Interfaces
         public void callback(ArrayList<BeatLocationModel> arrayList);
     }
 
+    public interface GetNotificationListener {
+        public void callback(ArrayList<NotificationModel> arrayList);
+    }
+
+    public interface OnMessageUpdateListener {
+        public void onUpdated();
+    }
+
     public interface DeleteOffenceListener {
         public void onSuccess();
         public void onUnSuccess();
@@ -71,6 +80,11 @@ public class Interfaces
     public interface onImageUpload
     {
         void imagePathAfterUpload(String path);
+    }
+
+    public interface OnDownloadCompleted
+    {
+        void onCompleted();
     }
 
 }

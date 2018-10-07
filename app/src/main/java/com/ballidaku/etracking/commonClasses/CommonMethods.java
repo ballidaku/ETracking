@@ -91,7 +91,7 @@ public class CommonMethods
 
         snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG).setAction("Action", null);
         snackbar.getView().setBackgroundColor(ContextCompat.getColor(context, R.color.colorWhite));
-        TextView tv = (TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        TextView tv = snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
         tv.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
         tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
         snackbar.show();
@@ -114,7 +114,7 @@ public class CommonMethods
     {
         Glide.with(context)
              .load(path)
-             .apply(new RequestOptions().centerCrop().placeholder(R.drawable.ic_placeholder_loading).error(R.drawable.ic_placeholder_image_not_available))
+             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_user_placeholder).error(R.mipmap.ic_user_placeholder))
              .into(imageView);
     }
 
@@ -122,8 +122,21 @@ public class CommonMethods
     {
         Glide.with(context)
                 .load(path)
-                .apply(new RequestOptions().centerCrop().placeholder(R.drawable.ic_placeholder_loading).error(R.drawable.ic_placeholder_video_not_available).centerCrop())
+                .apply(new RequestOptions().centerCrop().placeholder(R.drawable.ic_placeholder_loading).error(R.drawable.ic_placeholder_video_not_available))
                 .into(imageView);
+    }
+
+    public void shareVideoLink(Context context,String link)
+    {
+        try {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name));
+            i.putExtra(Intent.EXTRA_TEXT, link);
+            context.startActivity(Intent.createChooser(i, "choose one"));
+        } catch(Exception e) {
+            //e.toString();
+        }
     }
 
     /*public void showImageGlide2(Context context, final ZoomableImageView zoomableImageView, String path)
@@ -348,12 +361,20 @@ public class CommonMethods
 
     public String convertTimeStampToDateTime(long timeStamp)
     {
-        String dateTime;
+        String dateTime="";
 
         SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa", Locale.US);
         dateTime = sfd.format(new Date(timeStamp));
 
-        // Log.e(TAG,"dateTime "+dateTime);
+        return dateTime;
+    }
+
+    public String convertTimeStampToDateTime2(long timeStamp)
+    {
+        String dateTime="";
+
+        SimpleDateFormat sfd = new SimpleDateFormat("dd MMM yy hh:mm aa", Locale.US);
+        dateTime = sfd.format(new Date(timeStamp));
 
         return dateTime;
     }
@@ -495,17 +516,10 @@ public class CommonMethods
         cal2.setTime(calendar.getTime());
 
         //now compare the dates using functions
-        if (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
-        {
-            if (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH))
-            {
-                return true;
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
 
-            }
-        }
-
-        return false;
     }
+
 
 
     public class OnSpinnerItemSelected implements AdapterView.OnItemSelectedListener

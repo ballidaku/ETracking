@@ -29,6 +29,8 @@ public class MyConstant
     public static final String USER_ID="user_id";
     public static final String FCM_TOKEN="fcm_token";
     public static final String USERS="users";
+    public static final String NOTIFICATIONS="notifications";
+    public static final String NOTIFICATION_TEXT="notification_text";
     public static final String TIME="time";
     public static final String LOCATION="location";
     public static final String LAST_LOCATION="last_location";
@@ -40,6 +42,7 @@ public class MyConstant
     public static final String IMAGE_PATH="image_path";
     public static final String VIDEO_PATH="video_path";
     public static final String VIDEO_THUMBNAIL="video_thumbnail";
+    public static final String VIDEO_NAME="video_name";
 
     public static final String ADMIN="admin";
     public static final String SUB_ADMIN="sub_admin";

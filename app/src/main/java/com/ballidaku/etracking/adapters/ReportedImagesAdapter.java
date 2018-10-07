@@ -84,7 +84,7 @@ public class ReportedImagesAdapter extends RecyclerView.Adapter<ReportedImagesAd
         String[] dateTime = mImagesList.get(position).getReportedTime().split(" ");
 
 
-        CommonMethods.getInstance().showImageGlide(context,holder.imageViewReported,imageUrl);
+        CommonMethods.getInstance().showImageGlide2(context,holder.imageViewReported,imageUrl);
 
 
         String reportedBy=mImagesList.get(position).getReportedBy();
@@ -101,7 +101,7 @@ public class ReportedImagesAdapter extends RecyclerView.Adapter<ReportedImagesAd
         holder.textViewTime.setText(CommonMethods.getInstance().convertTimeToTimeFormat(dateTime[1]+" "+dateTime[2]));
 
 
-        if (showDeleteIcon == false && showShareIcon == false)
+        if (!showDeleteIcon && !showShareIcon)
         {
             holder.linearLayoutShareDelete.setVisibility(View.GONE);
         }
@@ -147,6 +147,7 @@ public class ReportedImagesAdapter extends RecyclerView.Adapter<ReportedImagesAd
 
         LinearLayout linearLayoutReportedBy;
         LinearLayout linearLayoutShareDelete;
+        LinearLayout linearLayoutDownload;
 
         CardView cardViewLocal;
 
@@ -154,19 +155,20 @@ public class ReportedImagesAdapter extends RecyclerView.Adapter<ReportedImagesAd
         {
             super(view);
 
-            imageViewReported = (ImageView) view.findViewById(R.id.imageViewReported);
-            textViewDate = (TextView) view.findViewById(R.id.textViewDate);
-            textViewTime = (TextView) view.findViewById(R.id.textViewTime);
-            textViewReportedBy = (TextView) view.findViewById(R.id.textViewReportedBy);
+            imageViewReported = view.findViewById(R.id.imageViewReported);
+            textViewDate =  view.findViewById(R.id.textViewDate);
+            textViewTime =  view.findViewById(R.id.textViewTime);
+            textViewReportedBy =  view.findViewById(R.id.textViewReportedBy);
 
-            linearLayoutReportedBy = (LinearLayout) view.findViewById(R.id.linearLayoutReportedBy);
-            linearLayoutShareDelete = (LinearLayout) view.findViewById(R.id.linearLayoutShareDelete);
+            linearLayoutReportedBy = view.findViewById(R.id.linearLayoutReportedBy);
+            linearLayoutShareDelete = view.findViewById(R.id.linearLayoutShareDelete);
+            linearLayoutDownload = view.findViewById(R.id.linearLayoutDownload);
+            linearLayoutDownload.setVisibility(View.GONE);
+
+            cardViewLocal =  view.findViewById(R.id.cardView);
 
 
-            cardViewLocal = (CardView) view.findViewById(R.id.cardView);
-
-
-            imageViewShareDelete = (ImageView) view.findViewById(R.id.imageViewShareDelete);
+            imageViewShareDelete = view.findViewById(R.id.imageViewShareDelete);
 
 
             imageViewReported.setOnClickListener(new View.OnClickListener()

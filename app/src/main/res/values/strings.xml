@@ -71,5 +71,7 @@
     <string name="choose_from_gallery">Choose From Gallery</string>
     <string name="cancel">Cancel</string>
     <string name="camera_permission_error">Camera Permission error</string>
+    <string name="no_result_found">No Result Found</string>
+    <string name="write_something_here">Write something good here ☺</string>
 
 </resources>

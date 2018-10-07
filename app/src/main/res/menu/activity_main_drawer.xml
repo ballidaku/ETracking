@@ -20,9 +20,19 @@
             android:title="Reported Images"/>
 
         <item
+            android:id="@+id/nav_reported_videos"
+            android:icon="@drawable/ic_reported_videos"
+            android:title="Reported Videos"/>
+
+        <item
             android:id="@+id/nav_reported_offence"
             android:icon="@mipmap/ic_offence"
             android:title="Reported Offence"/>
+
+        <item
+            android:id="@+id/nav_post_notification"
+            android:icon="@drawable/ic_notifications"
+            android:title="Post Notification"/>
 
         <item
             android:id="@+id/nav_sign_out"

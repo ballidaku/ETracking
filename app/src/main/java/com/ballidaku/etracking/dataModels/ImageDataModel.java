@@ -7,20 +7,17 @@ package com.ballidaku.etracking.dataModels;
 public class ImageDataModel
 {
 
-    String image_path;
-    String reported_time;
-    String reportedBy;
-    String beatID;
-    String reportedImageID;
+    private String image_path;
+    private String reported_time;
+    private String reportedBy;
+    private String beatID;
+    private String reportedImageID;
 
     public String getReportedBy()
     {
         return reportedBy;
     }
 
-    public ImageDataModel()
-    {
-    }
 
     public ImageDataModel(String image_path, String reported_time,String reportedBy,
                           String beatID,

@@ -1,6 +1,5 @@
 package com.ballidaku.etracking.adapters;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,11 +18,13 @@ import android.widget.TextView;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
+import com.ballidaku.etracking.commonClasses.CompressImageVideo;
+import com.ballidaku.etracking.commonClasses.DownloadTask;
 import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.dataModels.VideoDataModel;
-import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAdapter.MyViewHolder>
@@ -34,10 +35,10 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
     private ArrayList<VideoDataModel> videoDataModelArrayList;
     private Context context;
 
-    private boolean showDeleteIcon;
-    private boolean showShareIcon;
+    public boolean showDeleteIcon;
+    public boolean showShareIcon;
 
-    private CardView cardView;
+//    private CardView cardView;
 
 
     public ReportedVideosAdapter(Context context, ArrayList<VideoDataModel> videoDataModelArrayList)
@@ -69,6 +70,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
     {
 
         String imageUrl = videoDataModelArrayList.get(position).getVideoThumbnailPath();
+        String videoName = videoDataModelArrayList.get(position).getVideoName();
         String[] dateTime = videoDataModelArrayList.get(position).getReportedTime().split(" ");
 
 
@@ -88,10 +90,15 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
         holder.textViewDate.setText(CommonMethods.getInstance().convertDateToDateFormat(dateTime[0]));
         holder.textViewTime.setText(CommonMethods.getInstance().convertTimeToTimeFormat(dateTime[1] + " " + dateTime[2]));
 
+        //Check video in Download
+        File file = new File(CompressImageVideo.getInstance().getDownloadVideoDirectoryPath(context), videoName);
+        holder.linearLayoutDownload.setVisibility(file.exists() ? View.GONE : View.VISIBLE);
+
 
         if (!showDeleteIcon && !showShareIcon)
         {
             holder.linearLayoutShareDelete.setVisibility(View.GONE);
+
         }
         else
         {
@@ -105,6 +112,8 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
             {
                 holder.imageViewShareDelete.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_share, null));
             }
+
+            holder.linearLayoutDownload.setVisibility(View.GONE);
         }
 
 
@@ -133,6 +142,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
 
         LinearLayout linearLayoutReportedBy;
         LinearLayout linearLayoutShareDelete;
+        LinearLayout linearLayoutDownload;
 
         CardView cardViewLocal;
 
@@ -147,6 +157,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
 
             linearLayoutReportedBy = view.findViewById(R.id.linearLayoutReportedBy);
             linearLayoutShareDelete = view.findViewById(R.id.linearLayoutShareDelete);
+            linearLayoutDownload = view.findViewById(R.id.linearLayoutDownload);
 
 
             cardViewLocal = view.findViewById(R.id.cardView);
@@ -160,17 +171,36 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
                 @Override
                 public void onClick(View v)
                 {
+
+                    String videoName = videoDataModelArrayList.get(getAdapterPosition()).getVideoName();
+
+                    File file = new File(CompressImageVideo.getInstance().getDownloadVideoDirectoryPath(context), videoName);
+
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+                    Uri data = Uri.parse(file.getAbsolutePath());
+                    intent.setDataAndType(data, "video/m4a");
+                    context.startActivity(intent);
+
+                }
+            });
+
+            linearLayoutDownload.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
                     String videoPath = videoDataModelArrayList.get(getAdapterPosition()).getVideoPath();
+                    String videoName = videoDataModelArrayList.get(getAdapterPosition()).getVideoName();
+                    File file = new File(CompressImageVideo.getInstance().getDownloadVideoDirectoryPath(context), videoName);
 
-
-
-                    if (videoPath != null)
+                    new DownloadTask(context, file, new Interfaces.OnDownloadCompleted()
                     {
-                        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
-                        Uri data = Uri.parse(videoPath);
-                        intent.setDataAndType(data, "video/m4a");
-                        context.startActivity(intent);
-                    }
+                        @Override
+                        public void onCompleted()
+                        {
+                            notifyDataSetChanged();
+                        }
+                    }).execute(videoPath);
                 }
             });
 
@@ -192,21 +222,17 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
                     }
                     else
                     {
-
-                        linearLayoutShareDelete.setVisibility(View.GONE);
-                        cardView = cardViewLocal;
-
-                        String[] permission = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-                        ((MainActivity) context).requestAppPermissions(permission, R.string.permission, 54);
-
+                        CommonMethods.getInstance().shareVideoLink(context,videoDataModelArrayList.get(getAdapterPosition()).getVideoPath());
+                        //linearLayoutShareDelete.setVisibility(View.GONE);
+//                        cardView = cardViewLocal;
+                        //String[] permission = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+                       // ((MainActivity) context).requestAppPermissions(permission, R.string.permission, 54);
                     }
                 }
             });
 
         }
     }
-
-
 
 
     public void delete(final int adapterPosition, String beatID, String reportedImageID)
@@ -222,7 +248,7 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
                 showDeleteIcon = false;
                 notifyDataSetChanged();
                 CommonDialogs.getInstance().dialog.dismiss();
-                CommonMethods.getInstance().showToast(context, "Image deleted successfully");
+                CommonMethods.getInstance().showToast(context, "Video deleted successfully");
             }
 
             @Override
@@ -232,11 +258,6 @@ public class ReportedVideosAdapter extends RecyclerView.Adapter<ReportedVideosAd
             }
         });
     }
-
-
-
-
-
 
 
 }

@@ -3,11 +3,22 @@ package com.ballidaku.etracking.dataModels;
 public class VideoDataModel
 {
     private String videoPath="";
+    private String videoName="";
     private String videoThumbnailPath="";
     private String reportedTime="";
     private String reportedBy="";
     private String beatID="";
     private String reportedVideoID="";
+
+    public String getVideoName()
+    {
+        return videoName;
+    }
+
+    public void setVideoName(String videoName)
+    {
+        this.videoName = videoName;
+    }
 
     public String getVideoThumbnailPath()
     {

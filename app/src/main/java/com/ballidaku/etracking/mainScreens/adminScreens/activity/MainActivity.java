@@ -27,8 +27,10 @@ import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
 import com.ballidaku.etracking.mainScreens.ProfileActivity;
+import com.ballidaku.etracking.mainScreens.adminScreens.fragment.PostNotificationFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.ReportedImagesFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.ReportedOffenceFragment;
+import com.ballidaku.etracking.mainScreens.adminScreens.fragment.ReportedVideosFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.SearchGuardByCategoryFragment;
 import com.ballidaku.etracking.mainScreens.adminScreens.fragment.SearchGuardByNameFragment;
 
@@ -70,15 +72,16 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
             {
                 ((ReportedImagesFragment) currentFragment).reportedImagesAdapter.getBitmapOfView();
             }
+
         }
     }
 
     private void setUpViews()
     {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                   this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -174,6 +177,11 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
                 {
                     ((ReportedImagesFragment) currentFragment).refreshMenus();
                 }
+                else if ((currentFragment instanceof ReportedVideosFragment) &&
+                        (((ReportedVideosFragment) currentFragment).reportedVideosAdapter.showShareIcon || ((ReportedVideosFragment) currentFragment).reportedVideosAdapter.showDeleteIcon))
+                {
+                    ((ReportedVideosFragment) currentFragment).refreshMenus();
+                }
                 else
                 {
                     super.onBackPressed();
@@ -227,6 +235,10 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
                 {
                     ((ReportedImagesFragment) currentFragment).showShareOption();
                 }
+                else if (currentFragment instanceof ReportedVideosFragment)
+                {
+                    ((ReportedVideosFragment) currentFragment).showShareOption();
+                }
 
                 break;
 
@@ -239,6 +251,10 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
                 else if (currentFragment instanceof ReportedImagesFragment)
                 {
                     ((ReportedImagesFragment) currentFragment).showDeleteOption();
+                }
+                else if (currentFragment instanceof ReportedVideosFragment)
+                {
+                    ((ReportedVideosFragment) currentFragment).showDeleteOption();
                 }
                 break;
 
@@ -332,21 +348,29 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_track_beats)
+        if (id == R.id.nav_track_beats && !(currentFragment instanceof SearchGuardByCategoryFragment))
         {
             CommonMethods.getInstance().switchfragment(context, currentFragment = new SearchGuardByCategoryFragment());
         }
-        else if (id == R.id.nav_search_guard)
+        else if (id == R.id.nav_search_guard && !(currentFragment instanceof SearchGuardByNameFragment))
         {
             CommonMethods.getInstance().switchfragment(context, currentFragment = new SearchGuardByNameFragment());
         }
-        else if (id == R.id.nav_reported_images)
+        else if (id == R.id.nav_reported_images && !(currentFragment instanceof ReportedImagesFragment))
         {
             CommonMethods.getInstance().switchfragment(context, currentFragment = new ReportedImagesFragment());
         }
-        else if (id == R.id.nav_reported_offence)
+        else if (id == R.id.nav_reported_videos && !(currentFragment instanceof ReportedVideosFragment))
+        {
+            CommonMethods.getInstance().switchfragment(context, currentFragment = new ReportedVideosFragment());
+        }
+        else if (id == R.id.nav_reported_offence && !(currentFragment instanceof ReportedOffenceFragment))
         {
             CommonMethods.getInstance().switchfragment(context, currentFragment = new ReportedOffenceFragment());
+        }
+        else if (id == R.id.nav_post_notification && !(currentFragment instanceof PostNotificationFragment))
+        {
+            CommonMethods.getInstance().switchfragment(context, currentFragment = new PostNotificationFragment());
         }
         else if (id == R.id.nav_sign_out)
         {

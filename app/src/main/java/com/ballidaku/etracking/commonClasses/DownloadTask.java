@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.PowerManager;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,24 +18,37 @@ public class DownloadTask extends AsyncTask<String, Integer, String>
 
     Context context;
     private PowerManager.WakeLock mWakeLock;
-    public ProgressDialog mProgressDialog;
-    private String fileName;
     private OutputStream output = null;
+    File file;
+    ProgressDialog progressDialog;
+    Interfaces.OnDownloadCompleted onDownloadCompleted;
 
-    private File root = android.os.Environment.getExternalStorageDirectory();
-    private String tempraryDirectory;
-
-    File f;
-
-    public DownloadTask(Context context, ProgressDialog mProgressDialog, String fileName, String tempDirect)
+    public DownloadTask(Context context, File file, Interfaces.OnDownloadCompleted onDownloadCompleted)
     {
         this.context = context;
+        this.file=file;
+        this.onDownloadCompleted=onDownloadCompleted;
 
-        this.mProgressDialog = mProgressDialog;
-        this.fileName = fileName;
-        this.tempraryDirectory = tempDirect;
-      //  tempraryDirectory = root.getAbsolutePath() + "/" + context.getString(R.string.app_name) + "/Audios";
+        progressDialog= new ProgressDialog(context);
+        progressDialog.setMax(100);
+        progressDialog.setMessage("Please wait....");
+        progressDialog.setTitle("Video Downloading");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 
+    }
+
+    @Override
+    protected void onPreExecute()
+    {
+        super.onPreExecute();
+
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+        mWakeLock.acquire();
+
+        progressDialog.show();
+
+//        CommonDialogs.getInstance().showProgressDialog(context,"Downloading please wait...");
     }
 
     @Override
@@ -60,17 +72,7 @@ public class DownloadTask extends AsyncTask<String, Integer, String>
 
             input = connection.getInputStream();
 
-            String tempraryFilePath = tempraryDirectory + "/" + fileName;
-
-            File dir = new File(tempraryDirectory);
-            if (!dir.exists())
-            {
-
-                dir.mkdirs();
-            }
-            f = new File(tempraryFilePath);
-
-            output = new FileOutputStream(tempraryFilePath);
+            output = new FileOutputStream(file);
 
             byte data[] = new byte[4096];
             long total = 0;
@@ -111,26 +113,13 @@ public class DownloadTask extends AsyncTask<String, Integer, String>
         return null;
     }
 
-    @Override
-    protected void onPreExecute()
-    {
-        super.onPreExecute();
 
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-        mWakeLock.acquire();
-        mProgressDialog.show();
-    }
 
     @Override
     protected void onProgressUpdate(Integer... progress)
     {
         super.onProgressUpdate(progress);
-
-        mProgressDialog.setIndeterminate(false);
-        mProgressDialog.setMax(100);
-        mProgressDialog.setProgress(progress[0]);
-
+        progressDialog.setProgress(progress[0]);
     }
 
     @Override
@@ -138,15 +127,16 @@ public class DownloadTask extends AsyncTask<String, Integer, String>
     {
 
         mWakeLock.release();
-        mProgressDialog.dismiss();
+        progressDialog.dismiss();
         if (result != null)
         {
-            mProgressDialog.show();
+            progressDialog.show();
 
         }
         else
         {
-            Toast.makeText(context, "File downloaded", Toast.LENGTH_SHORT).show();
+            CommonMethods.getInstance().showToast(context, "File downloaded");
+            onDownloadCompleted.onCompleted();
 
         }
 

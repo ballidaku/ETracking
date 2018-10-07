@@ -68,7 +68,7 @@ public class ReportedOffenceFragment extends Fragment
         super.onResume();
 
         ((MainActivity)getActivity()).toolbar.setTitle("Reported Offence");
-        ((MainActivity)getActivity()).refreshMenu(3);
+        ((MainActivity)getActivity()).refreshMenu(4);
     }
 
     private void setUpViews()

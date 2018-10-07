@@ -69,6 +69,9 @@ dependencies {
 
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.0'
     implementation project(path: ':ffmpeg4android_lib')
+
+    // dexter runtime permissions
+    implementation 'com.karumi:dexter:5.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

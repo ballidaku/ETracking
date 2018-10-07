@@ -53,9 +53,7 @@ public class ReportedImagesActivity extends AppCompatActivity
     {
 
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        toolbar.setTitle("Select Images");
-//        toolbar.setTitleTextColor(ContextCompat.getColor(context,R.color.colorWhite));
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
