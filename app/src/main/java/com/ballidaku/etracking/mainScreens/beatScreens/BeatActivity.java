@@ -3,8 +3,10 @@ package com.ballidaku.etracking.mainScreens.beatScreens;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -16,6 +18,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -29,6 +32,7 @@ import android.widget.Toast;
 import com.ballidaku.etracking.BuildConfig;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
+import com.ballidaku.etracking.commonClasses.BackgroundDetectedActivitiesService;
 import com.ballidaku.etracking.commonClasses.CommonDialogs;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.CompressImageVideo;
@@ -40,6 +44,7 @@ import com.ballidaku.etracking.frontScreens.LoginActivity;
 import com.ballidaku.etracking.mainScreens.ProfileActivity;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -66,7 +71,7 @@ import java.util.Date;
 import static com.ballidaku.etracking.commonClasses.MyConstant.REQUEST_CHECK_SETTINGS;
 
 
-public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  View.OnClickListener
+public class BeatActivity extends AbsRuntimeMarshmallowPermission implements View.OnClickListener
 {
 
 
@@ -106,6 +111,9 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
     TextView textViewLastUpdateTime;
     String startTrackKey;
 
+//    List<ActivityTransition> transitions = new ArrayList<>();
+
+    BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -122,8 +130,70 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
 
         // restore the values from saved instance state
         restoreValuesFromBundle(savedInstanceState);
+
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(MyConstant.BROADCAST_DETECTED_ACTIVITY)) {
+                    int type = intent.getIntExtra("type", -1);
+                    int confidence = intent.getIntExtra("confidence", 0);
+                    handleUserActivity(type, confidence);
+                }
+            }
+        };
+
     }
 
+
+    private void handleUserActivity(int type, int confidence) {
+
+        String Type="";
+        switch (type) {
+            case DetectedActivity.IN_VEHICLE: {
+                Type="Vehicle";
+                break;
+            }
+            case DetectedActivity.ON_BICYCLE: {
+                Type="Bicycle";
+                break;
+            }
+            case DetectedActivity.ON_FOOT: {
+                Type="foot";
+                break;
+            }
+            case DetectedActivity.RUNNING: {
+                Type="running";
+                break;
+            }
+            case DetectedActivity.STILL: {
+                Type="still";
+                break;
+            }
+            case DetectedActivity.TILTING: {
+
+                Type="TILTING";
+                break;
+            }
+            case DetectedActivity.WALKING: {
+                Type="WALKING";
+                break;
+            }
+            case DetectedActivity.UNKNOWN: {
+                Type="UNKNOWN";
+                break;
+            }
+        }
+
+
+       CommonMethods.getInstance().showToast(context, "User activity : " + Type + "  Confidence : " + confidence);
+
+//        if (confidence > MyConstant.CONFIDENCE) {
+//            txtActivity.setText(label);
+//            txtConfidence.setText("Confidence: " + confidence);
+//            imgActivity.setImageResource(icon);
+//        }
+    }
 
     //**********************************************************************************************
     //**********************************************************************************************
@@ -283,6 +353,13 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
 
     public void startUpdatesButtonHandler()
     {
+        //******************************************************************************************
+        // Activity
+        //******************************************************************************************
+        Intent intent1 = new Intent(BeatActivity.this, BackgroundDetectedActivitiesService.class);
+        startService(intent1);
+
+        //******************************************************************************************
 
         startTrackKey = MyFirebase.getInstance().getStartLoactionNode(context);
 
@@ -319,6 +396,13 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
 
     public void stopUpdatesButtonHandler()
     {
+        //******************************************************************************************
+        // Activity
+        //******************************************************************************************
+        Intent intent = new Intent(BeatActivity.this, BackgroundDetectedActivitiesService.class);
+        stopService(intent);
+        //******************************************************************************************
+
         mRequestingLocationUpdates = false;
         stopLocationUpdates();
     }
@@ -352,6 +436,25 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
         }
 
         updateLocationUI();
+
+        //******************************************************************************************
+        // Activity
+        //******************************************************************************************
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter(MyConstant.BROADCAST_DETECTED_ACTIVITY));
+        //******************************************************************************************
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        //******************************************************************************************
+        // Activity
+        //******************************************************************************************
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        //******************************************************************************************
     }
 
     private void setButtonsEnabledState()
@@ -370,7 +473,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
 
     private boolean checkPermissions()
     {
-        int permissionState = ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION);
+        int permissionState = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
@@ -378,21 +481,14 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements  Vi
     protected void onDestroy()
     {
 
-        if (mRequestingLocationUpdates) {
+        if (mRequestingLocationUpdates)
+        {
             // pausing location updates
             stopLocationUpdates();
         }
 
         super.onDestroy();
     }
-
-
-
-
-
-
-
-
 
 
     private void setUpViews()
