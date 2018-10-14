@@ -6,6 +6,7 @@ package com.ballidaku.etracking.commonClasses;
 public class MyConstant
 {
 
+    public static String SERVER_KEY= "AAAAaJHZvpA:APA91bGN3oxPltIZJxiAyZ_H7NthN6csEJYpWBUXyRgcOTSxeWS21xjtqXK-MdXFdMySKOsidw8yTwS8gXTnI95v6hYJYeeebeTBmq3MGG9jSW7w0E_NkU1YgcsU-UpajnMWxR5AXHuU";
     public static final String BROADCAST_DETECTED_ACTIVITY = "activity_intent";
     static final long DETECTION_INTERVAL_IN_MILLISECONDS = 30 * 1000;
     public static final int CONFIDENCE = 70;

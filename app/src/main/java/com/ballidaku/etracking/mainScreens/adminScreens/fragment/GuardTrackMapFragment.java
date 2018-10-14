@@ -60,15 +60,6 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
     ArrayList<ArrayList<BeatLocationModel.DateLocation>> dateLocationArrayList;
 
-/*    @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_beat_location);
-        context = this;
-
-        setUpViews();
-    }*/
 
 
     @Override
@@ -94,7 +85,6 @@ public class GuardTrackMapFragment extends Fragment implements OnMapReadyCallbac
 
         beatName = getArguments().getString(MyConstant.BEAT_NAME);
         String locationData = getArguments().getString(MyConstant.LOCATION);
-       // dateLocationArrayList = getArguments().getParcelableArrayList(MyConstant.LOCATION);
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<ArrayList<BeatLocationModel.DateLocation>>>(){}.getType();
         dateLocationArrayList = gson.fromJson(locationData, type);

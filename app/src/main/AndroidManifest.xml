@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
 
     <uses-feature android:name="android.hardware.camera"/>
 
@@ -95,9 +95,10 @@
                 android:resource="@xml/provider_paths"/>
         </provider>
 
-        <activity android:name=".mainScreens.beatScreens.NotificationActivity"
-                  android:label=""
-                  android:screenOrientation="portrait"/>
+        <activity
+            android:name=".mainScreens.beatScreens.NotificationActivity"
+            android:label=""
+            android:screenOrientation="portrait"/>
 
 
         <!-- Service that provides activity recognition data. Setting the android:exported attribute
@@ -105,9 +106,17 @@
       intent. -->
         <service
             android:name=".commonClasses.DetectedActivitiesIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
-        <service android:name=".commonClasses.BackgroundDetectedActivitiesService"></service>
+        <service android:name=".commonClasses.BackgroundDetectedActivitiesService"/>
+
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
 
     </application>
 

@@ -35,6 +35,8 @@ import com.ballidaku.etracking.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import org.json.JSONObject;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -44,9 +46,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 /**
@@ -106,16 +117,16 @@ public class CommonMethods
 
     public boolean isValidMobile(String phone)
     {
-        return  !Pattern.matches("[a-zA-Z]+", phone) && phone.length() == 10;
+        return !Pattern.matches("[a-zA-Z]+", phone) && phone.length() == 10;
     }
 
 
     public void showImageGlide(Context context, ImageView imageView, String path)
     {
         Glide.with(context)
-             .load(path)
-             .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_user_placeholder).error(R.mipmap.ic_user_placeholder))
-             .into(imageView);
+                .load(path)
+                .apply(new RequestOptions().centerCrop().placeholder(R.mipmap.ic_user_placeholder).error(R.mipmap.ic_user_placeholder))
+                .into(imageView);
     }
 
     public void showImageGlide2(Context context, ImageView imageView, String path)
@@ -126,15 +137,18 @@ public class CommonMethods
                 .into(imageView);
     }
 
-    public void shareVideoLink(Context context,String link)
+    public void shareVideoLink(Context context, String link)
     {
-        try {
+        try
+        {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.setType("text/plain");
             i.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name));
             i.putExtra(Intent.EXTRA_TEXT, link);
             context.startActivity(Intent.createChooser(i, "choose one"));
-        } catch(Exception e) {
+        }
+        catch (Exception e)
+        {
             //e.toString();
         }
     }
@@ -159,8 +173,6 @@ public class CommonMethods
                  }
              });
     }*/
-
-
 
 
     public void switchfragment(Fragment fromWhere, Fragment toWhere)
@@ -225,11 +237,9 @@ public class CommonMethods
 
         o2.inSampleSize = scale;
 
-       return BitmapFactory.decodeStream(context.getContentResolver().openInputStream(selectedImage), null, o2);
+        return BitmapFactory.decodeStream(context.getContentResolver().openInputStream(selectedImage), null, o2);
 
     }
-
-
 
 
     /**
@@ -280,7 +290,7 @@ public class CommonMethods
         loc2.setLongitude(lon2);
 
         float distanceInMeters = loc1.distanceTo(loc2) / 1000;
-        Log.e(TAG,"distanceInMeters "+distanceInMeters);
+        Log.e(TAG, "distanceInMeters " + distanceInMeters);
 
         //return String.valueOf(new DecimalFormat("##.##").format(distanceInMeters)) + " Km";
         return distanceInMeters;
@@ -361,7 +371,7 @@ public class CommonMethods
 
     public String convertTimeStampToDateTime(long timeStamp)
     {
-        String dateTime="";
+        String dateTime = "";
 
         SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss aa", Locale.US);
         dateTime = sfd.format(new Date(timeStamp));
@@ -371,7 +381,7 @@ public class CommonMethods
 
     public String convertTimeStampToDateTime2(long timeStamp)
     {
-        String dateTime="";
+        String dateTime = "";
 
         SimpleDateFormat sfd = new SimpleDateFormat("dd MMM yy hh:mm aa", Locale.US);
         dateTime = sfd.format(new Date(timeStamp));
@@ -521,7 +531,6 @@ public class CommonMethods
     }
 
 
-
     public class OnSpinnerItemSelected implements AdapterView.OnItemSelectedListener
     {
         Spinner spinner;
@@ -653,18 +662,73 @@ public class CommonMethods
         }
         else
         {*/
-            ((Activity) context).startActivityForResult(intent, MyConstant.CAMERA_REQUEST);
+        ((Activity) context).startActivityForResult(intent, MyConstant.CAMERA_REQUEST);
 //        }
     }
 
 
+    //**********************************************************************************************
+    // Send Notification
+    //**********************************************************************************************
+    public void sendNotification(String fcmID, HashMap<String, String> map)
+    {
 
+        String body123 = "{\n\t\"to\": \" " + fcmID + "\",\n\t\"data\" :" + convert1(map) + "\n}";
 
+        Log.e("DataToSend", "" + body123);
 
+        OkHttpClient client = new OkHttpClient();
 
+        MediaType mediaType = MediaType.parse("application/json");
 
+        RequestBody body = RequestBody.create(mediaType, body123);
+        Request request = new Request
+                .Builder()
+                .url("https://fcm.googleapis.com/fcm/send")
+                .post(body)
+                .addHeader("authorization", "key=" + MyConstant.SERVER_KEY)
+                .addHeader("content-type", "application/json")
+                .addHeader("cache-control", "no-cache")
+                .build();
 
+        client.newCall(request).enqueue(new Callback()
+        {
+            @Override
+            public void onFailure(Call call, IOException e)
+            {
+                e.printStackTrace();
+            }
 
+            @Override
+            public void onResponse(Call call, Response response) throws IOException
+            {
+                if (!response.isSuccessful())
+                {
+                    throw new IOException("Unexpected code " + response);
+                }
+                else
+                {
+                    Log.e("ResponseBALLI", response.body().string());
+                    Log.d("sa", "sa");
+                    Log.i("MESSAGE", response.message());
+                }
+            }
+        });
+
+    }
+
+    public String convert1(HashMap<String, String> map) {
+        JSONObject obj = null;
+        try {
+
+            obj = new JSONObject(map);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return obj.toString();
+    }
 
 
 }

@@ -111,7 +111,7 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Vie
     TextView textViewLastUpdateTime;
     String startTrackKey;
 
-//    List<ActivityTransition> transitions = new ArrayList<>();
+    int beatGustType;
 
     BroadcastReceiver broadcastReceiver;
 
@@ -132,10 +132,13 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Vie
         restoreValuesFromBundle(savedInstanceState);
 
 
-        broadcastReceiver = new BroadcastReceiver() {
+        broadcastReceiver = new BroadcastReceiver()
+        {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(MyConstant.BROADCAST_DETECTED_ACTIVITY)) {
+            public void onReceive(Context context, Intent intent)
+            {
+                if (intent.getAction().equals(MyConstant.BROADCAST_DETECTED_ACTIVITY))
+                {
                     int type = intent.getIntExtra("type", -1);
                     int confidence = intent.getIntExtra("confidence", 0);
                     handleUserActivity(type, confidence);
@@ -146,47 +149,58 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Vie
     }
 
 
-    private void handleUserActivity(int type, int confidence) {
+    private void handleUserActivity(int type, int confidence)
+    {
+        beatGustType = type;
+        String beatGustTypeString = "";
 
-        String Type="";
-        switch (type) {
-            case DetectedActivity.IN_VEHICLE: {
-                Type="Vehicle";
+        switch (type)
+        {
+            case DetectedActivity.IN_VEHICLE:
+            {
+                beatGustTypeString = "IN_VEHICLE";
                 break;
             }
-            case DetectedActivity.ON_BICYCLE: {
-                Type="Bicycle";
+            case DetectedActivity.ON_BICYCLE:
+            {
+                beatGustTypeString = "ON_BICYCLE";
                 break;
             }
-            case DetectedActivity.ON_FOOT: {
-                Type="foot";
+            case DetectedActivity.ON_FOOT:
+            {
+                beatGustTypeString = "ON_FOOT";
                 break;
             }
-            case DetectedActivity.RUNNING: {
-                Type="running";
+            case DetectedActivity.RUNNING:
+            {
+                beatGustTypeString = "RUNNING";
                 break;
             }
-            case DetectedActivity.STILL: {
-                Type="still";
+            case DetectedActivity.STILL:
+            {
+                beatGustTypeString = "STILL";
                 break;
             }
-            case DetectedActivity.TILTING: {
+            case DetectedActivity.TILTING:
+            {
 
-                Type="TILTING";
+                beatGustTypeString = "TILTING";
                 break;
             }
-            case DetectedActivity.WALKING: {
-                Type="WALKING";
+            case DetectedActivity.WALKING:
+            {
+                beatGustTypeString = "WALKING";
                 break;
             }
-            case DetectedActivity.UNKNOWN: {
-                Type="UNKNOWN";
+            case DetectedActivity.UNKNOWN:
+            {
+                beatGustTypeString = "UNKNOWN";
                 break;
-            }
-        }
+
+        }}
 
 
-       CommonMethods.getInstance().showToast(context, "User activity : " + Type + "  Confidence : " + confidence);
+        CommonMethods.getInstance().showToast(context, "User activity : " + beatGustTypeString + "  Confidence : " + confidence);
 
 //        if (confidence > MyConstant.CONFIDENCE) {
 //            txtActivity.setText(label);
@@ -267,7 +281,12 @@ public class BeatActivity extends AbsRuntimeMarshmallowPermission implements Vie
 
     private void updateLocationUI()
     {
-        if (mCurrentLocation != null)
+        if (mCurrentLocation != null && (beatGustType==DetectedActivity.ON_BICYCLE ||
+                beatGustType==DetectedActivity.ON_FOOT ||
+                beatGustType==DetectedActivity.RUNNING ||
+                beatGustType==DetectedActivity.TILTING ||
+                beatGustType==DetectedActivity.WALKING ||
+                beatGustType==DetectedActivity.UNKNOWN))
         {
             textViewLastUpdateTime.setText(mLastUpdateTime);
 
