@@ -32,6 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -99,6 +100,8 @@ public class MyFirebase<Z, T>
         String userEmail = MySharedPreference.getInstance().getUserEmail(context);
         String userType = MySharedPreference.getInstance().getUserType(context);
 
+        getAllUserTokenAndSendNotification(context);
+
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put(MyConstant.NOTIFICATION_TEXT, text);
         hashMap.put(MyConstant.REPORTED_TIME, ServerValue.TIMESTAMP);
@@ -124,6 +127,38 @@ public class MyFirebase<Z, T>
             }
         });
     }
+
+    public void getAllUserTokenAndSendNotification(Context context)
+    {
+        root.child(MyConstant.USERS).child(MyConstant.BEAT).addListenerForSingleValueEvent(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
+            {
+                for (final DataSnapshot childDataSnapshot : dataSnapshot.getChildren())
+                {
+                    String key=childDataSnapshot.getKey();
+
+                    if(childDataSnapshot.hasChild(MyConstant.FCM_TOKEN))
+                    {
+                        String fcmToken=(String)childDataSnapshot.child(MyConstant.FCM_TOKEN).getValue();
+                        HashMap map = new HashMap();
+                        map.put("title", "Notification");
+                        map.put("body", "Hello baby");
+
+                        CommonMethods.getInstance().sendNotification(fcmToken, map);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError)
+            {
+
+            }
+        });
+    }
+
 
     ArrayList<NotificationModel> notificationModelArrayList;
 
@@ -279,6 +314,14 @@ public class MyFirebase<Z, T>
                                 HashMap<String, Object> hashMap = (HashMap<String, Object>) child2.getValue();
 
                                 Log.e(TAG, "User hashMap " + hashMap);
+
+
+                                HashMap<String, Object> hashMapNew = new HashMap<>();
+                                hashMapNew.put(MyConstant.FCM_TOKEN, FirebaseInstanceId.getInstance().getToken());
+                                FirebaseDatabase.getInstance()
+                                        .getReference()
+                                        .getRoot()
+                                        .child(MyConstant.USERS).child(child.getKey()).child(child2.getKey()).updateChildren(hashMapNew);
 
                                 if (hashMap.get(MyConstant.USER_ALLOWED).equals("true"))
                                 {

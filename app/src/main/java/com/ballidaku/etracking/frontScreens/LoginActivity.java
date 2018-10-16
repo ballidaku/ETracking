@@ -48,9 +48,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void setUpIds()
     {
-//        editTextUserName=(EditText)findViewById(R.id.editTextUserName);
-//        spinnerUserType=(Spinner)findViewById(R.id.spinnerUserType);
-//        findViewById(R.id.buttonLogin).setOnClickListener(this);
 
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
         editTextPassword = (EditText) findViewById(R.id.editTextPassword);

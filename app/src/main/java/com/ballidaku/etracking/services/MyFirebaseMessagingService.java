@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.MyConstant;
@@ -22,18 +23,14 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
 import java.util.HashMap;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService
 {
+    String TAG = MyFirebaseMessagingService.class.getSimpleName();
 
-    String message, title;
     Uri notificationSound;
-
-    JSONObject object;
 
     @Override
     public void onNewToken(String s)
@@ -69,49 +66,27 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService
 
         final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplication());
         String body = remoteMessage.getData().get("body");
-        title = remoteMessage.getData().get("title");
+        String title = remoteMessage.getData().get("title");
+
+        Log.e(TAG,"Body "+body+" title "+title);
 
         if (body != null)
         {
 
 
-                JsonObject jsonObject = new JsonObject().getAsJsonObject(body);
+            JsonObject jsonObject = new JsonObject().getAsJsonObject(body);
 
-                Bundle extras = new Bundle();
-                String type = "";
-                if (jsonObject.has(MyConstant.TYPE))
-                {
-                    type = jsonObject.getString(MyConstant.TYPE);
+            Bundle extras = new Bundle();
 
-                    extras.putString(MyConstant.TYPE, type);
-                }
-                if (jsonObject.has(MyConstant.MESSAGEE))
-                {
-                    message = jsonObject.getString(MyConstant.MESSAGEE);
+            String message = body;
 
-                }
+            Intent intent1 = new Intent(getApplication(), MainActivity.class);
 
-                Intent intent1 = new Intent(getApplication(), MainActivity.class);
+            intent1.putExtras(extras);
 
+            PendingIntent resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
 
-                intent1.putExtras(extras);
-
-                PendingIntent resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
-
-                if (type.equals(MyConstant.CUSTOMERS) && MySharedPreference.getInstance().getNoti(getApplicationContext(), MyConstant.CUSTOMER))
-                {
-                    showSmallNotification(mBuilder, title, message, resultPendingIntent);
-                }
-                else if (type.equals(MyConstant.USERFEEDS) && MySharedPreference.getInstance().getNoti(getApplicationContext(), MyConstant.NEWSFEEDS))
-                {
-                    showSmallNotification(mBuilder, title, message, resultPendingIntent);
-                }
-
-                else if (type.equals(MyConstant.LEAD) && MySharedPreference.getInstance().getNoti(getApplicationContext(), MyConstant.LEAD))
-                {
-                    showSmallNotification(mBuilder, title, message, resultPendingIntent);
-                }
-
+            showSmallNotification(mBuilder, title, message, resultPendingIntent);
 
         }
     }
