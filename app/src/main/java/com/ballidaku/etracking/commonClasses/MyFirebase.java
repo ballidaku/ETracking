@@ -70,23 +70,19 @@ public class MyFirebase<Z, T>
 
     public void updateUser(final Context context, HashMap<String, Object> map, final ProfileActivity.OnCompleteListener onCompleteListener)
     {
-        root.child(MyConstant.USERS).child(MySharedPreference.getInstance().getUserType(context)).child(MySharedPreference.getInstance().getUserID(context)).updateChildren(map).addOnCompleteListener(new OnCompleteListener<Void>()
+        root.child(MyConstant.USERS).child(MySharedPreference.getInstance().getUserType(context)).child(MySharedPreference.getInstance().getUserID(context)).updateChildren(map).addOnCompleteListener(task ->
         {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
+
+            CommonDialogs.getInstance().dismissDialog();
+
+            if (task.isSuccessful())
             {
-
-                CommonDialogs.getInstance().dismissDialog();
-
-                if (task.isSuccessful())
-                {
-                    onCompleteListener.onComplete();
-                    CommonMethods.getInstance().showToast(context, "User updated successfully");
-                }
-                else
-                {
-                    CommonMethods.getInstance().showToast(context, "Please try again");
-                }
+                onCompleteListener.onComplete();
+                CommonMethods.getInstance().showToast(context, "User updated successfully");
+            }
+            else
+            {
+                CommonMethods.getInstance().showToast(context, "Please try again");
             }
         });
 
@@ -100,7 +96,7 @@ public class MyFirebase<Z, T>
         String userEmail = MySharedPreference.getInstance().getUserEmail(context);
         String userType = MySharedPreference.getInstance().getUserType(context);
 
-        getAllUserTokenAndSendNotification(context);
+
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put(MyConstant.NOTIFICATION_TEXT, text);
@@ -109,45 +105,53 @@ public class MyFirebase<Z, T>
         hashMap.put(MyConstant.USER_ID, userID);
         hashMap.put(MyConstant.USER_TYPE, userType);
 
+        getAllUserTokenAndSendNotification(context, MyConstant.BEAT,hashMap);
+
         String key = root.child(MyConstant.NOTIFICATIONS).push().getKey();
 
-        root.child(MyConstant.NOTIFICATIONS).child(key).updateChildren(hashMap).addOnCompleteListener(new OnCompleteListener<Void>()
+        if(key != null)
+        root.child(MyConstant.NOTIFICATIONS).child(key).updateChildren(hashMap).addOnCompleteListener(task ->
         {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
+            CommonDialogs.getInstance().dismissDialog();
+
+            if (task.isSuccessful())
             {
-                CommonDialogs.getInstance().dismissDialog();
+                CommonMethods.getInstance().showToast(context, "Notification successfully posted.");
+                onMessageUpdateListener.onUpdated();
 
-                if (task.isSuccessful())
-                {
-                    CommonMethods.getInstance().showToast(context, "Notification successfully posted.");
-                    onMessageUpdateListener.onUpdated();
-
-                }
             }
         });
     }
 
-    public void getAllUserTokenAndSendNotification(Context context)
+    private void getAllUserTokenAndSendNotification(Context context,String type, HashMap<String, Object> hashMap)
     {
-        root.child(MyConstant.USERS).child(MyConstant.BEAT).addListenerForSingleValueEvent(new ValueEventListener()
+        root.child(MyConstant.USERS).child(type).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
+                long total=dataSnapshot.getChildrenCount();
+                long current=0;
                 for (final DataSnapshot childDataSnapshot : dataSnapshot.getChildren())
                 {
-                    String key=childDataSnapshot.getKey();
+                 //   String key = childDataSnapshot.getKey();
 
-                    if(childDataSnapshot.hasChild(MyConstant.FCM_TOKEN))
+                    if (childDataSnapshot.hasChild(MyConstant.FCM_TOKEN))
                     {
-                        String fcmToken=(String)childDataSnapshot.child(MyConstant.FCM_TOKEN).getValue();
-                        HashMap map = new HashMap();
-                        map.put("title", "Notification");
-                        map.put("body", "Hello baby");
+                        String fcmToken = (String) childDataSnapshot.child(MyConstant.FCM_TOKEN).getValue();
+                        HashMap<String, String> map = new HashMap<>();
+                        map.put("title", "Notification from "+MySharedPreference.getInstance().getUserName(context));
+                        map.put("body", CommonMethods.getInstance().convertHashmapToGsonString(hashMap));
 
                         CommonMethods.getInstance().sendNotification(fcmToken, map);
                     }
+                    current++;
+
+                    if(total==current && !type.equals(MyConstant.SUB_ADMIN))
+                    {
+                        getAllUserTokenAndSendNotification(context,MyConstant.SUB_ADMIN,hashMap);
+                    }
+
                 }
             }
 
@@ -160,12 +164,12 @@ public class MyFirebase<Z, T>
     }
 
 
-    ArrayList<NotificationModel> notificationModelArrayList;
+    private ArrayList<NotificationModel> notificationModelArrayList;
 
     public void getAllNotifications(Context context, boolean b, final Interfaces.GetNotificationListener getNotificationListener)
     {
-        if(b)
-        CommonDialogs.getInstance().progressDialog(context);
+        if (b)
+            CommonDialogs.getInstance().progressDialog(context);
 
         root.child(MyConstant.NOTIFICATIONS).addListenerForSingleValueEvent(new ValueEventListener()
         {
@@ -187,12 +191,13 @@ public class MyFirebase<Z, T>
                     final String email = (String) childNotification.child(MyConstant.USER_EMAIL).getValue();
                     final String userType = (String) childNotification.child(MyConstant.USER_TYPE).getValue();
 
+                    if(userType != null)
                     root.child(MyConstant.USERS).child(userType).orderByChild(MyConstant.USER_EMAIL).equalTo(email).addListenerForSingleValueEvent(new ValueEventListener()
                     {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot2)
                         {
-                            final int size2 = (int) dataSnapshot2.getChildrenCount();
+                            //final int size2 = (int) dataSnapshot2.getChildrenCount();
 
                             for (DataSnapshot child2 : dataSnapshot2.getChildren())
                             {
@@ -200,7 +205,7 @@ public class MyFirebase<Z, T>
 
                                 NotificationModel notificationModel = new NotificationModel();
                                 notificationModel.setNotification((String) childNotification.child(MyConstant.NOTIFICATION_TEXT).getValue());
-                                notificationModel.setNotificationDateTime(CommonMethods.getInstance().convertTimeStampToDateTime2((long)childNotification.child(MyConstant.REPORTED_TIME).getValue()));
+                                notificationModel.setNotificationDateTime(CommonMethods.getInstance().convertTimeStampToDateTime2((long) childNotification.child(MyConstant.REPORTED_TIME).getValue()));
                                 notificationModel.setSenderId(child2.getKey());
                                 notificationModel.setSenderName((String) child2.child(MyConstant.USER_NAME).getValue());
 
@@ -242,9 +247,9 @@ public class MyFirebase<Z, T>
         root.child(MyConstant.USERS).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
-                Log.e(TAG, dataSnapshot.getValue().toString());
+              //  Log.e(TAG, dataSnapshot.getValue());
                 if (dataSnapshot.hasChild(MyConstant.ADMIN))
                 {
                     myListener.callback(true);
@@ -256,30 +261,26 @@ public class MyFirebase<Z, T>
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
+            public void onCancelled(@NonNull DatabaseError databaseError)
             {
             }
         });
     }
 
-    public void create(final Context context, final String userType, final String userID, final HashMap<String, Object> result)
+    private void create(final Context context, final String userType, final String userID, final HashMap<String, Object> result)
     {
-        root.child(MyConstant.USERS).child(userType).child(userID).updateChildren(result).addOnCompleteListener(new OnCompleteListener<Void>()
+        root.child(MyConstant.USERS).child(userType).child(userID).updateChildren(result).addOnCompleteListener(task ->
         {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
+            if (task.isSuccessful())
             {
-                if (task.isSuccessful())
-                {
-                    //openActivity(context, userID, userType, result);
-                    openLogin(context);
-                    CommonMethods.getInstance().showToast(context, "User created successfully");
-                }
+                //openActivity(context, userID, userType, result);
+                openLogin(context);
+                CommonMethods.getInstance().showToast(context, "User created successfully");
             }
         });
     }
 
-    public void openLogin(Context context)
+    private void openLogin(Context context)
     {
         Intent intent = new Intent(context, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -288,22 +289,24 @@ public class MyFirebase<Z, T>
         ((Activity) context).finish();
     }
 
+    @SuppressWarnings("unchecked")
     public void logInUser(final Context context, final String email)
     {
 
         root.child(MyConstant.USERS).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot)
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot)
             {
                 for (final DataSnapshot child : dataSnapshot.getChildren())
                 {
                     Log.e(TAG, child.getKey());
 
+                    if(child.getKey() != null)
                     root.child(MyConstant.USERS).child(child.getKey()).orderByChild(MyConstant.USER_EMAIL).equalTo(email).addListenerForSingleValueEvent(new ValueEventListener()
                     {
                         @Override
-                        public void onDataChange(DataSnapshot dataSnapshot)
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot)
                         {
 
                             for (DataSnapshot child2 : dataSnapshot.getChildren())
@@ -315,30 +318,36 @@ public class MyFirebase<Z, T>
 
                                 Log.e(TAG, "User hashMap " + hashMap);
 
-
-                                HashMap<String, Object> hashMapNew = new HashMap<>();
-                                hashMapNew.put(MyConstant.FCM_TOKEN, FirebaseInstanceId.getInstance().getToken());
-                                FirebaseDatabase.getInstance()
-                                        .getReference()
-                                        .getRoot()
-                                        .child(MyConstant.USERS).child(child.getKey()).child(child2.getKey()).updateChildren(hashMapNew);
-
-                                if (hashMap.get(MyConstant.USER_ALLOWED).equals("true"))
+                                // To create new token
+                                if(child2.getKey() != null)
+                                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener((LoginActivity) context, instanceIdResult ->
                                 {
-                                    openActivity(context, child2.getKey(), child.getKey(), hashMap);
-                                }
-                                else
-                                {
-                                    CommonDialogs.getInstance().dismissDialog();
-                                    CommonMethods.getInstance().showToast(context, "Contact DFO for permission to login");
-                                }
+                                    String newToken = instanceIdResult.getToken();
 
+                                    HashMap<String, Object> hashMapNew = new HashMap<>();
+                                    hashMapNew.put(MyConstant.FCM_TOKEN, newToken);
+
+                                    //Update new token to firebase database
+                                    FirebaseDatabase.getInstance()
+                                            .getReference()
+                                            .getRoot()
+                                            .child(MyConstant.USERS).child(child.getKey()).child(child2.getKey()).updateChildren(hashMapNew);
+
+                                    if (hashMap != null && hashMap.get(MyConstant.USER_ALLOWED).equals("true"))
+                                    {
+                                        openActivity(context, child2.getKey(), child.getKey(), hashMap);
+                                    }
+                                    else
+                                    {
+                                        CommonDialogs.getInstance().dismissDialog();
+                                        CommonMethods.getInstance().showToast(context, "Contact DFO for permission to login");
+                                    }
+                                });
                             }
-
                         }
 
                         @Override
-                        public void onCancelled(DatabaseError databaseError)
+                        public void onCancelled(@NonNull DatabaseError databaseError)
                         {
                             Log.e(TAG, "ERROR     " + databaseError.getMessage());
                         }
@@ -347,7 +356,7 @@ public class MyFirebase<Z, T>
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError)
+            public void onCancelled(@NonNull DatabaseError databaseError)
             {
 
             }
@@ -386,7 +395,7 @@ public class MyFirebase<Z, T>
 
 
         String userID = MySharedPreference.getInstance().getUserID(context);
-        String userName = MySharedPreference.getInstance().getUserName(context);
+        //String userName = MySharedPreference.getInstance().getUserName(context);
 
         root.child(MyConstant.LOCATION).child(userID).child(CommonMethods.getInstance().getCurrentDate()).child(startTrackKey).push().updateChildren(hashMap);
 
@@ -472,61 +481,43 @@ public class MyFirebase<Z, T>
         }
 
 
-        uploadTask.addOnFailureListener(new OnFailureListener()
+        uploadTask.addOnFailureListener(exception ->
         {
-            @Override
-            public void onFailure(@NonNull Exception exception)
-            {
-                // Handle unsuccessful uploads
+            // Handle unsuccessful uploads
 
-                exception.printStackTrace();
-                CommonDialogs.getInstance().dismissDialog();
+            exception.printStackTrace();
+            CommonDialogs.getInstance().dismissDialog();
 
 
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+        }).addOnSuccessListener(taskSnapshot -> mountainImagesRef.getDownloadUrl().addOnCompleteListener(task ->
         {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+            String downloadUrl = task.getResult().toString();
+
+            Log.e(TAG, "ImagePath " + downloadUrl);
+
+            CompressImageVideo.getInstance().deleteTempraryImageDirectory(context);
+
+            if (imageOffence.equals(MyConstant.IMAGE))
             {
-                mountainImagesRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>()
-                {
-                    @Override
-                    public void onComplete(@NonNull Task<Uri> task)
-                    {
-                        String downloadUrl = task.getResult().toString();
-
-                        Log.e(TAG, "ImagePath " + downloadUrl);
-
-                        CompressImageVideo.getInstance().deleteTempraryImageDirectory(context);
-
-                        if (imageOffence.equals(MyConstant.IMAGE))
-                        {
-                            reportImage(context, downloadUrl);
-                        }
-                        else if (imageOffence.equals(MyConstant.OFFENCE))
-                        {
-                            reportOffence(context, downloadUrl, (HashMap<String, Object>) data);
-                        }
-                        else if (imageOffence.equals(MyConstant.USER_IMAGE))
-                        {
-                            ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
-                        }
-                        else if (imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
-                        {
-                            ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
-                        }
-                    }
-                });
-
-
+                reportImage(context, downloadUrl);
             }
-        });
+            else if (imageOffence.equals(MyConstant.OFFENCE))
+            {
+                reportOffence(context, downloadUrl, (HashMap<String, Object>) data);
+            }
+            else if (imageOffence.equals(MyConstant.USER_IMAGE))
+            {
+                ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
+            }
+            else if (imageOffence.equals(MyConstant.VIDEO_THUMBNAIL))
+            {
+                ((Interfaces.onImageUpload) data).imagePathAfterUpload(downloadUrl);
+            }
+        }));
     }
 
     /**
      * API for creating thumbnail from Video
-     *
      * @param filePath - video file path
      * @param type     - size MediaStore.Images.Thumbnails.MINI_KIND or MICRO_KIND
      * @return thumbnail bitmap

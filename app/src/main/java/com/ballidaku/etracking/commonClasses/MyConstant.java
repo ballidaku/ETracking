@@ -82,4 +82,5 @@ public class MyConstant
 
     public static final String SPECIESNAME="species_name";
     public static final String DESCRIPTION="description";
+    public static final String FROM_WHERE="from_where";
 }

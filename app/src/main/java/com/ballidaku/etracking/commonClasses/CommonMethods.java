@@ -1,6 +1,7 @@
 package com.ballidaku.etracking.commonClasses;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -34,6 +35,9 @@ import android.widget.Toast;
 import com.ballidaku.etracking.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.json.JSONObject;
 
@@ -717,7 +721,7 @@ public class CommonMethods
 
     }
 
-    public String convert1(HashMap<String, String> map) {
+    private String convert1(HashMap<String, String> map) {
         JSONObject obj = null;
         try {
 
@@ -728,6 +732,31 @@ public class CommonMethods
         }
 
         return obj.toString();
+    }
+
+    public String convertHashmapToGsonString(HashMap<String, Object> myObject)
+    {
+        Gson gson = new Gson();
+        return gson.toJson(myObject);
+    }
+
+    public JsonObject convertStringToGsonObject(String s)
+    {
+        JsonParser jsonParser = new JsonParser();
+        return  (JsonObject)jsonParser.parse(s);
+    }
+
+    public Boolean isActivityRunning(Context context,Class activityClass)
+    {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = activityManager.getRunningTasks(Integer.MAX_VALUE);
+
+        for (ActivityManager.RunningTaskInfo task : tasks) {
+            if (activityClass.getCanonicalName().equalsIgnoreCase(task.baseActivity.getClassName()))
+                return true;
+        }
+
+        return false;
     }
 
 

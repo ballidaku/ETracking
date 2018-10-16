@@ -1,6 +1,7 @@
 package com.ballidaku.etracking.mainScreens.beatScreens;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,7 +10,7 @@ import android.widget.TextView;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.adapters.NotificationsAdapter;
-import com.ballidaku.etracking.commonClasses.Interfaces;
+import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.RecyclerViewEmptySupport;
 import com.ballidaku.etracking.dataModels.NotificationModel;
@@ -57,14 +58,7 @@ public class NotificationActivity extends AppCompatActivity
 
     void getFirebaseNotifications(boolean b)
     {
-        MyFirebase.getInstance().getAllNotifications(context, b,new Interfaces.GetNotificationListener()
-        {
-            @Override
-            public void callback(ArrayList<NotificationModel> arrayList)
-            {
-                notificationsAdapter.addData(arrayList);
-            }
-        });
+        MyFirebase.getInstance().getAllNotifications(context, b, arrayList -> notificationsAdapter.addData(arrayList));
     }
 
     @Override
@@ -74,12 +68,32 @@ public class NotificationActivity extends AppCompatActivity
         {
             case android.R.id.home:
 
-                finish();
+                onBack();
 
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        onBack();
+    }
+
+    private void onBack()
+    {
+        if(CommonMethods.getInstance().isActivityRunning(context,BeatActivity.class))
+        {
+            finish();
+        }
+        else
+        {
+            startActivity(new Intent(context,BeatActivity.class));
+            finish();
         }
     }
 }

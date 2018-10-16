@@ -11,7 +11,6 @@ import android.widget.EditText;
 
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.adapters.NotificationsAdapter;
-import com.ballidaku.etracking.commonClasses.Interfaces;
 import com.ballidaku.etracking.commonClasses.MyFirebase;
 import com.ballidaku.etracking.commonClasses.RecyclerViewEmptySupport;
 import com.ballidaku.etracking.dataModels.NotificationModel;
@@ -68,14 +67,7 @@ public class PostNotificationFragment extends Fragment implements View.OnClickLi
 
     void getFirebaseNotifications(boolean b)
     {
-        MyFirebase.getInstance().getAllNotifications(context, b,new Interfaces.GetNotificationListener()
-        {
-            @Override
-            public void callback(ArrayList<NotificationModel> arrayList)
-            {
-                notificationsAdapter.addData(arrayList);
-            }
-        });
+        MyFirebase.getInstance().getAllNotifications(context, b, arrayList -> notificationsAdapter.addData(arrayList));
     }
 
     @Override
@@ -91,14 +83,7 @@ public class PostNotificationFragment extends Fragment implements View.OnClickLi
                 {
                     editTextNewsFeed.getText().clear();
 
-                    MyFirebase.getInstance().createNotification(context, text, new Interfaces.OnMessageUpdateListener()
-                    {
-                        @Override
-                        public void onUpdated()
-                        {
-                            getFirebaseNotifications(false);
-                        }
-                    });
+                    MyFirebase.getInstance().createNotification(context, text, () -> getFirebaseNotifications(false));
                 }
                 break;
         }

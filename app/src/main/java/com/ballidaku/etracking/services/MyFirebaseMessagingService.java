@@ -9,15 +9,16 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.ballidaku.etracking.R;
+import com.ballidaku.etracking.commonClasses.CommonMethods;
 import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
 import com.ballidaku.etracking.commonClasses.NotificationHelper;
 import com.ballidaku.etracking.mainScreens.adminScreens.activity.MainActivity;
+import com.ballidaku.etracking.mainScreens.beatScreens.NotificationActivity;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -68,23 +69,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService
         String body = remoteMessage.getData().get("body");
         String title = remoteMessage.getData().get("title");
 
-        Log.e(TAG,"Body "+body+" title "+title);
+        Log.e(TAG, "Body " + body + " title " + title);
 
         if (body != null)
         {
+            JsonObject jsonObject = CommonMethods.getInstance().convertStringToGsonObject(body);
+
+            String message = jsonObject.get(MyConstant.NOTIFICATION_TEXT).getAsString();
+
+            String userType = MySharedPreference.getInstance().getUserType(getApplicationContext());
+
+            Intent intent;
+            if (userType.equals(MyConstant.ADMIN) || userType.equals(MyConstant.SUB_ADMIN))
+            {
+//                Bundle extras = new Bundle();
+
+                intent = new Intent(getApplication(), MainActivity.class);
+                intent.putExtra(MyConstant.FROM_WHERE, MyConstant.NOTIFICATIONS);
+//                intent.putExtras(extras);
+            }
+            else
+            {
+                intent = new Intent(getApplication(), NotificationActivity.class);
+            }
 
 
-            JsonObject jsonObject = new JsonObject().getAsJsonObject(body);
-
-            Bundle extras = new Bundle();
-
-            String message = body;
-
-            Intent intent1 = new Intent(getApplication(), MainActivity.class);
-
-            intent1.putExtras(extras);
-
-            PendingIntent resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, intent1, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent resultPendingIntent = PendingIntent.getActivity(getApplication(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             showSmallNotification(mBuilder, title, message, resultPendingIntent);
 

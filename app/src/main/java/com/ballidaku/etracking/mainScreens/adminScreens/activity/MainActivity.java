@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.ballidaku.etracking.R;
 import com.ballidaku.etracking.commonClasses.AbsRuntimeMarshmallowPermission;
 import com.ballidaku.etracking.commonClasses.CommonMethods;
+import com.ballidaku.etracking.commonClasses.MyConstant;
 import com.ballidaku.etracking.commonClasses.MySharedPreference;
 import com.ballidaku.etracking.frontScreens.LoginActivity;
 import com.ballidaku.etracking.mainScreens.ProfileActivity;
@@ -57,6 +58,23 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
         context = this;
 
         setUpViews();
+
+//        Log.e(TAG,"Hello I am in onCreate");
+
+        checkIfComesFromNotification(getIntent());
+    }
+
+    private void checkIfComesFromNotification(Intent intent)
+    {
+        if(intent.getExtras()!= null)
+        {
+            String fromWhere=intent.getStringExtra(MyConstant.FROM_WHERE);
+
+            if(fromWhere.equals(MyConstant.NOTIFICATIONS))
+            {
+                CommonMethods.getInstance().switchfragment(context, currentFragment = new PostNotificationFragment());
+            }
+        }
     }
 
     @Override
@@ -93,8 +111,18 @@ public class MainActivity extends AbsRuntimeMarshmallowPermission implements Nav
 
         setUpData();
 
+        if(getIntent().getExtras()== null)
         CommonMethods.getInstance().switchfragment(context, currentFragment = new SearchGuardByCategoryFragment());
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        super.onNewIntent(intent);
+
+        checkIfComesFromNotification(intent);
+//        Log.e(TAG,"Hello I am in onNewIntent");
     }
 
     private void setUpData()
