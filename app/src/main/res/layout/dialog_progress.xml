@@ -6,14 +6,22 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <com.nipunbirla.boxloader.BoxLoaderView
+    <!--<com.nipunbirla.boxloader.BoxLoaderView
         android:id="@+id/progress"
         android:layout_width="60dp"
         android:layout_height="60dp"
         app:strokeColor="@color/colorWhite"
         app:loaderColor="@color/colorMaroonLight"
         app:strokeWidth="20"
-        app:speed="10"/>
+        app:speed="10"/>-->
+
+    <com.agrawalsuneet.squareloaderspack.loaders.RotatingSquareLoader
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:rotatingsquare_animDuration="2000"
+        app:rotatingsquare_sqaureColor="@color/colorGreen"
+        app:rotatingsquare_squareSideLength="40dp"
+        app:rotatingsquare_strokeWidth="15dp" />
 
     <TextView
         android:id="@+id/textViewMessage"

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.ballidaku.etracking">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.ballidaku.etracking">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
-    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera" />
 
     <application
         android:name=".commonClasses.MyApplication"
@@ -21,70 +22,67 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_logo_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".frontScreens.SplashActivity"
             android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".frontScreens.LoginActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".frontScreens.SignUpActivity"
             android:label=""
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".mainScreens.adminScreens.activity.MainActivity"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop">
-        </activity>
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mainScreens.beatScreens.BeatActivity"
             android:label=""
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait" />
 
         <!-- API key for the Android Maps API v2. The value is defined as a string resource. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key"/>
+            android:value="@string/google_maps_key" />
 
         <activity
             android:name=".mainScreens.beatScreens.ReportedImagesActivity"
             android:label=""
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mainScreens.beatScreens.ReportedVideosActivity"
             android:label=""
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".mainScreens.ProfileActivity"
-            android:label=""/>
+            android:label="" />
         <activity
             android:name=".mainScreens.beatScreens.ReportOffenceActivity"
             android:label=""
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden"/>
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".mainScreens.beatScreens.ViewReportedOffenceActivity"
             android:label=""
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
+            android:theme="@style/Base.Theme.AppCompat" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="c1ebda239809615578cf710b8654d41759688dfb"/>
+            android:value="c1ebda239809615578cf710b8654d41759688dfb" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -93,13 +91,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <activity
             android:name=".mainScreens.beatScreens.NotificationActivity"
             android:label=""
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
 
         <!-- Service that provides activity recognition data. Setting the android:exported attribute
@@ -107,15 +105,15 @@
       intent. -->
         <service
             android:name=".commonClasses.DetectedActivitiesIntentService"
-            android:exported="false"/>
+            android:exported="false" />
 
-        <service android:name=".commonClasses.BackgroundDetectedActivitiesService"/>
+        <service android:name=".commonClasses.BackgroundDetectedActivitiesService" />
 
         <service
             android:name=".services.MyFirebaseMessagingService"
             android:stopWithTask="false">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 

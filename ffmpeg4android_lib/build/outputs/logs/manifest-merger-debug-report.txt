@@ -1,41 +1,41 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-14:12
+ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:1-12:12
 	package
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:3:7-45
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:3:7-45
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
 	android:versionName
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:5:7-39
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:5:7-39
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
 	xmlns:android
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:11-69
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:2:11-69
 	android:versionCode
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:4:7-36
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-uses-sdk
-ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:6-75
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:6-75
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:6-75
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:6-75
-INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:6-75
-	android:targetSdkVersion
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:43-72
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-	android:minSdkVersion
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:16-42
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
-		INJECTED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:4:7-36
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
 uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
-ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:9:5-80
+ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:5-80
 	android:name
-		ADDED from /home/brst-pc93/StudioProjects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:9:22-78
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml:7:22-78
+uses-sdk
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		ADDED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
+		INJECTED from /Users/sharan/Studio Projects/ETracking/ffmpeg4android_lib/src/main/AndroidManifest.xml
